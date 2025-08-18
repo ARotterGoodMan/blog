@@ -1,8 +1,53 @@
 <template>
-  <main>
+  <main style="margin-bottom: 55px">
     <div class="container">
       <div class="row">
-        <section class="col-md-8"></section>
+        <section class="col-md-8">
+          <article class="blog-item">
+            <time>2025-8-10</time>
+            <a href="#">
+              <h1 class="blog-title">欢迎来到我的个人主页</h1>
+              <p class="blog-content">
+                这是一个使用 Vue 3 和 TypeScript 构建的个人主页模板。
+                你可以在这里展示你的个人信息、技能、项目经验等内容。
+                该模板采用响应式设计，适配各种设备和屏幕尺寸。
+              </p>
+            </a>
+          </article>
+          <article class="blog-item">
+            <time>2025-8-10</time>
+            <a href="#">
+              <h1 class="blog-title">欢迎来到我的个人主页</h1>
+              <p class="blog-content">
+                这是一个使用 Vue 3 和 TypeScript 构建的个人主页模板。
+                你可以在这里展示你的个人信息、技能、项目经验等内容。
+                该模板采用响应式设计，适配各种设备和屏幕尺寸。
+              </p>
+            </a>
+          </article>
+          <article class="blog-item">
+            <time>2025-8-10</time>
+            <a href="#">
+              <h1 class="blog-title">欢迎来到我的个人主页</h1>
+              <p class="blog-content">
+                这是一个使用 Vue 3 和 TypeScript 构建的个人主页模板。
+                你可以在这里展示你的个人信息、技能、项目经验等内容。
+                该模板采用响应式设计，适配各种设备和屏幕尺寸。
+              </p>
+            </a>
+          </article>
+          <article class="blog-item">
+            <time>2025-8-10</time>
+            <a href="#">
+              <h1 class="blog-title">欢迎来到我的个人主页</h1>
+              <p class="blog-content">
+                这是一个使用 Vue 3 和 TypeScript 构建的个人主页模板。
+                你可以在这里展示你的个人信息、技能、项目经验等内容。
+                该模板采用响应式设计，适配各种设备和屏幕尺寸。
+              </p>
+            </a>
+          </article>
+        </section>
         <aside class="col-md-4 col-sm-8 col-xs-8">
           <div class="sidebar">
             <div class="search-widget">
@@ -41,14 +86,12 @@
 </template>
 
 <script lang="ts" setup>
-
 const search = () => {
   const input = document.querySelector('.search-widget input') as HTMLInputElement
   const query = input.value.trim()
   input.value = ''
   if (query) {
     console.log('查找内容:', query)
-    // Implement search logic here
   } else {
     console.log('请确认您要查找的内容。')
   }
@@ -60,11 +103,16 @@ const mail_to_me = () => {
   input.value = ''
   if (mail) {
     console.log('您的邮箱:', mail)
-    // Implement search logic here
   } else {
     console.log('请确认您的邮箱。')
   }
 }
 </script>
 
-<style></style>
+<style>
+section a {
+  font-size: 16px;
+  font-weight: 400;
+  text-decoration: none;
+}
+</style>

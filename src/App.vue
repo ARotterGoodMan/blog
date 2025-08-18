@@ -1,21 +1,29 @@
 <template>
-  <my-nav :nav_items="nav_items" />
+  <my-nav :nav_items="nav_items" :Permissions="Permissions" />
   <router-view />
   <my-footer />
 </template>
 
 <script setup lang="ts">
+import router from './router'
 import MyNav from '@/components/MyNav.vue'
 import MyFooter from '@/components/MyFooter.vue'
-const nav_items = [
-  { name: '首页', path: '/', icon: 'fas fa-home' },
-  { name: '关于我', path: '/about', icon: 'fas fa-info-circle' },
-  { name: '联系我', path: '/t', icon: 'fas fa-phone' },
-]
+import type { RouteRecordName } from 'vue-router'
+
+const nav_items: { name: RouteRecordName; path: string; icon: string; type: number }[] = []
+const Permissions = 1
+for (const route of router.getRoutes()) {
+  if (route.meta.icon) {
+    console.log(typeof route.meta.type)
+    const nav_item = {
+      name: route.name,
+      path: route.path,
+      icon: route.meta.icon.toString(),
+      type: route.meta.type as number,
+    }
+    nav_items.push(nav_item)
+  }
+}
 </script>
 
-<style scoped>
-body {
-  min-height: 100vh;
-}
-</style>
+<style scoped></style>

@@ -20,7 +20,12 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <!-- 右侧导航菜单 - 使用ms-auto实现右对齐 -->
         <ul class="navbar-nav ms-auto">
-          <li v-for="item in props.nav_items" :key="item.path" class="nav-item">
+          <li
+            v-for="item in props.nav_items"
+            :key="item.path"
+            class="nav-item"
+            v-show="item.type <= props.Permissions"
+          >
             <router-link :to="item.path" :class="'nav-link ' + isActive(item.path)">
               <i :class="item.icon + ' me-2'"></i>
               {{ item.name }}
@@ -41,14 +46,16 @@
 </template>
 
 <script lang="ts" setup>
-import { useRoute } from 'vue-router'
+import { type RouteRecordName, useRoute } from 'vue-router'
 
 const props = defineProps<{
   nav_items: Array<{
-    name: string
+    name: RouteRecordName
     path: string
     icon: string
+    type?: number
   }>
+  Permissions: number
 }>()
 
 const currentRoute = useRoute()

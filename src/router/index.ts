@@ -9,20 +9,40 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
+      name: '首页',
       path: '/',
       component: MyIndex,
+      meta: {
+        icon: 'fas fa-home',
+        type: 0b0000
+      },
     },
     {
-      path: '/index',
-      component: MyIndex,
-    },
-    {
-      path: '/about',
+      name: '随笔记',
+      path: '/essay',
       component: MyAbout,
+      meta: {
+        icon: 'fas fa-info-circle',
+        type: 0b0000
+      },
     },
     {
-      path: '/t',
-      redirect: '/',
+      name: '联系',
+      path: '/contact',
+      component: MyIndex,
+      meta: {
+        icon: 'fas fa-phone',
+        type: 0b0000
+      },
+    },
+    {
+      name: '管理',
+      path: '/admin',
+      component: MyIndex,
+      meta: {
+        icon: 'fas fa-cog',
+        type: 0b0001,
+      },
     },
     {
       path: '/login',
