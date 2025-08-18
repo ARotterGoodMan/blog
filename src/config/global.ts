@@ -2,6 +2,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  password: string;
   token: string;
   isAdmin: number;
   is_login: boolean;
@@ -11,8 +12,9 @@ const user = <User>{
   name: '',
   email: '',
   token: '',
+  password: '',
   is_login: false,
-  isAdmin: 1,
+  isAdmin: 0,
 };
 
 export default user;

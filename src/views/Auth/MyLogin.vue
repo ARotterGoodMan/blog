@@ -33,9 +33,9 @@ function handleLogin() {
   user.name = "SXY"
   user.is_login = true
   user.email = email.value
-  user.isAdmin=1
+  user.isAdmin=0
   user.token="aaaaaaaaaaaa"
-  console.log(user)
+  user.password="123456"
   router.push('/')
 }
 </script>

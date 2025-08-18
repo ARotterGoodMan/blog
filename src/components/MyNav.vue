@@ -37,13 +37,12 @@
             >
           </li>
           <li class="nav-item" v-if="user.is_login">
-            <a
-              href="/"
+            <router-link
+              to="/profile"
               class="btn btn-danger ms-lg-2 mt-2 mt-lg-0"
               style="border-radius: 10px"
-              @click="logout"
               ><i class="fas fa-sign-out-alt me-2"></i>{{user.name}}
-            </a>
+            </router-link>
           </li>
         </ul>
       </div>
@@ -53,16 +52,7 @@
 
 <script lang="ts" setup>
 import { type RouteRecordName, useRoute } from 'vue-router'
-import { defineEmits } from 'vue'
 import user from '@/config/global.ts'
-
-const emit = defineEmits<{
-  (e: 'logout'): void
-  (e: 'login'): void
-  (e: 'register'): void
-  (e: 'updateUser', user: user): void
-}>()
-
 
 const props = defineProps<{
   nav_items: Array<{
@@ -81,11 +71,6 @@ const isActive = (path: string) => {
   } else {
     return ''
   }
-}
-const logout = (event:Event) => {
-  event.preventDefault()
-  emit('logout')
-  console.log(props.User)
 }
 </script>
 
