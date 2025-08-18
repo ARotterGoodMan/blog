@@ -12,6 +12,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  server: {
+    host: '0.0.0.0'
+  },
   //配置每种资源打包位置
   build: {
     rollupOptions: {

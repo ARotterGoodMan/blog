@@ -23,11 +23,19 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
+import user from '@/config/global'
+import router from '@/router'
 
 const email = ref('')
 const password = ref('')
 
 function handleLogin() {
-  console.log(`登录: ${email.value}, ${password.value}`)
+  user.name = "SXY"
+  user.is_login = true
+  user.email = email.value
+  user.isAdmin=1
+  user.token="aaaaaaaaaaaa"
+  console.log(user)
+  router.push('/')
 }
 </script>

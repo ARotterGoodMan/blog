@@ -1,5 +1,5 @@
 <template>
-  <my-nav :nav_items="nav_items" :Permissions="Permissions" />
+  <my-nav :nav_items="nav_items" />
   <router-view />
   <my-footer />
 </template>
@@ -11,7 +11,6 @@ import MyFooter from '@/components/MyFooter.vue'
 import type { RouteRecordName } from 'vue-router'
 
 const nav_items: { name: RouteRecordName; path: string; icon: string; type: number }[] = []
-const Permissions = 0 // 假设权限级别为1，实际应用中可以根据用户登录状态动态获取
 for (const route of router.getRoutes()) {
   if (route.meta.icon) {
     const nav_item = {
@@ -23,6 +22,7 @@ for (const route of router.getRoutes()) {
     nav_items.push(nav_item)
   }
 }
+
 </script>
 
 <style scoped></style>

@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import MyIndex from '@/views/MyIndex.vue'
-import MyAbout from '@/views/MyAbout.vue'
-import Login from '@/views/Auth/Login.vue'
-import Register from '@/views/Auth/Register.vue'
+import Index from '@/views/MyIndex.vue'
+import About from '@/views/MyAbout.vue'
+import Login from '@/views/Auth/MyLogin.vue'
+import Register from '@/views/Auth/MyRegister.vue'
 import ForgotPassword from '@/views/Auth/ForgotPassword.vue'
 
 const router = createRouter({
@@ -11,37 +11,37 @@ const router = createRouter({
     {
       name: '首页',
       path: '/',
-      component: MyIndex,
+      component: Index,
       meta: {
         icon: 'fas fa-home',
-        type: 0b0000
+        type: 0
       },
     },
     {
       name: '随笔记',
       path: '/essay',
-      component: MyAbout,
+      component: About,
       meta: {
         icon: 'fas fa-info-circle',
-        type: 0b0000
+        type: 0
       },
     },
     {
       name: '联系',
       path: '/contact',
-      component: MyIndex,
+      component: Index,
       meta: {
         icon: 'fas fa-phone',
-        type: 0b0000
+        type: 0
       },
     },
     {
       name: '管理',
       path: '/admin',
-      component: MyIndex,
+      component: Index,
       meta: {
         icon: 'fas fa-cog',
-        type: 0b0001,
+        type: 1,
       },
     },
     {

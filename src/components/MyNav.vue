@@ -21,20 +21,29 @@
         <!-- 右侧导航菜单 - 使用ms-auto实现右对齐 -->
         <ul class="navbar-nav ms-auto">
           <template v-for="item in props.nav_items">
-            <li class="nav-item" :key="item.path" v-if="item.type <= props.Permissions">
+            <li class="nav-item" :key="item.path" v-if="item.type <= user.isAdmin">
               <router-link :to="item.path" :class="'nav-link ' + isActive(item.path)">
                 <i :class="item.icon + ' me-2'"></i>
                 {{ item.name }}
               </router-link>
             </li>
           </template>
-          <li class="nav-item">
+          <li class="nav-item" v-if="!user.is_login">
             <router-link
               to="/login"
               class="btn btn-primary ms-lg-2 mt-2 mt-lg-0"
               style="border-radius: 10px"
               ><i class="fas fa-sign-in-alt me-2"></i>登录</router-link
             >
+          </li>
+          <li class="nav-item" v-if="user.is_login">
+            <a
+              href="/"
+              class="btn btn-danger ms-lg-2 mt-2 mt-lg-0"
+              style="border-radius: 10px"
+              @click="logout"
+              ><i class="fas fa-sign-out-alt me-2"></i>{{user.name}}
+            </a>
           </li>
         </ul>
       </div>
@@ -44,6 +53,16 @@
 
 <script lang="ts" setup>
 import { type RouteRecordName, useRoute } from 'vue-router'
+import { defineEmits } from 'vue'
+import user from '@/config/global.ts'
+
+const emit = defineEmits<{
+  (e: 'logout'): void
+  (e: 'login'): void
+  (e: 'register'): void
+  (e: 'updateUser', user: user): void
+}>()
+
 
 const props = defineProps<{
   nav_items: Array<{
@@ -52,7 +71,6 @@ const props = defineProps<{
     icon: string
     type: number
   }>
-  Permissions: number
 }>()
 
 const currentRoute = useRoute()
@@ -63,6 +81,11 @@ const isActive = (path: string) => {
   } else {
     return ''
   }
+}
+const logout = (event:Event) => {
+  event.preventDefault()
+  emit('logout')
+  console.log(props.User)
 }
 </script>
 
