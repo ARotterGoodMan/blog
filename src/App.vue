@@ -11,10 +11,9 @@ import MyFooter from '@/components/MyFooter.vue'
 import type { RouteRecordName } from 'vue-router'
 
 const nav_items: { name: RouteRecordName; path: string; icon: string; type: number }[] = []
-const Permissions = 1
+const Permissions = 0 // 假设权限级别为1，实际应用中可以根据用户登录状态动态获取
 for (const route of router.getRoutes()) {
   if (route.meta.icon) {
-    console.log(typeof route.meta.type)
     const nav_item = {
       name: route.name,
       path: route.path,
