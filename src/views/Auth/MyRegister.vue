@@ -1,6 +1,6 @@
 <template>
   <div class="container d-flex justify-content-center align-items-center vh-100">
-    <div class="card p-4 shadow" style="width: 360px;">
+    <div class="card p-4 shadow" style="width: 360px">
       <h3 class="text-center mb-3"><i class="fas fa-user-plus"></i> 注册</h3>
       <form @submit.prevent="handleRegister">
         <div class="mb-3">

@@ -52,7 +52,7 @@
 
 <script lang="ts" setup>
 import { type RouteRecordName, useRoute } from 'vue-router'
-import user from '@/config/global.ts'
+import global from '@/config/global.ts'
 
 const props = defineProps<{
   nav_items: Array<{
@@ -72,6 +72,8 @@ const isActive = (path: string) => {
     return ''
   }
 }
+
+const user = global.user
 </script>
 
 <style scoped>

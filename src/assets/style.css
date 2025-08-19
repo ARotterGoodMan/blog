@@ -642,7 +642,8 @@ a#loadGallery {
   padding-top: 100px;
   text-align: center;
 }
-.template-images ul{
+
+.template-images ul {
   /* 删除前的点*/
   list-style: none;
 }

@@ -7,9 +7,6 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import '@/assets/style.css'
 
-
-
-
 const app = createApp(App)
 
 app.use(router)

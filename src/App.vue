@@ -22,7 +22,6 @@ for (const route of router.getRoutes()) {
     nav_items.push(nav_item)
   }
 }
-
 </script>
 
 <style scoped></style>
