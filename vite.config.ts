@@ -13,14 +13,13 @@ export default defineConfig({
     },
   },
   server: {
-    host: '0.0.0.0'
+    host: '0.0.0.0',
   },
   //配置每种资源打包位置
   build: {
     rollupOptions: {
       output: {
         assetFileNames(assetInfo) {
-
           if (assetInfo.names[0] && assetInfo.names[0].endsWith('.css')) {
             return 'css/[name]-[hash][extname]'
           }

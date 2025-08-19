@@ -4,8 +4,6 @@
   </main>
 </template>
 
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 
 <style></style>

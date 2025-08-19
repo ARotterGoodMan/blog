@@ -7,7 +7,6 @@ import Register from '@/views/Auth/MyRegister.vue'
 import Profile from '@/views/Profile/MyProfile.vue'
 import ForgotPassword from '@/views/Auth/ForgotPassword.vue'
 
-
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -17,7 +16,7 @@ const router = createRouter({
       component: Index,
       meta: {
         icon: 'fas fa-home',
-        type: 0
+        type: 0,
       },
     },
     {
@@ -26,7 +25,7 @@ const router = createRouter({
       component: About,
       meta: {
         icon: 'fas fa-info-circle',
-        type: 0
+        type: 0,
       },
     },
     {
@@ -35,7 +34,7 @@ const router = createRouter({
       component: Index,
       meta: {
         icon: 'fas fa-phone',
-        type: 0
+        type: 0,
       },
     },
     {
@@ -47,17 +46,17 @@ const router = createRouter({
         type: 1,
       },
       beforeEnter: (to, from, next) => {
-      // 检查用户是否已登录
+        // 检查用户是否已登录
         const isLoggedIn = user.is_login
         const isAdmin = user.isAdmin
-        if (isAdmin>0) {
+        if (isAdmin > 0) {
           next() // 已登录，允许访问
         } else if (isLoggedIn) {
           next('/') // 未登录，重定向到登录页面
-        }else {
+        } else {
           next('/login') // 未登录，重定向到登录页面
         }
-      }
+      },
     },
     {
       path: '/login',
@@ -72,18 +71,18 @@ const router = createRouter({
       component: ForgotPassword,
     },
     {
-    path: '/profile',
-    component: Profile,
-    beforeEnter: (to, from, next) => {
-      // 检查用户是否已登录
-      const isLoggedIn = user.is_login
-      if (isLoggedIn) {
-        next() // 已登录，允许访问
-      } else {
-        next('/login') // 未登录，重定向到登录页面
-      }
+      path: '/profile',
+      component: Profile,
+      beforeEnter: (to, from, next) => {
+        // 检查用户是否已登录
+        const isLoggedIn = user.is_login
+        if (isLoggedIn) {
+          next() // 已登录，允许访问
+        } else {
+          next('/login') // 未登录，重定向到登录页面
+        }
+      },
     },
-  },
   ],
 })
 

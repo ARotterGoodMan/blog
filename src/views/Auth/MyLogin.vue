@@ -30,12 +30,12 @@ const email = ref('')
 const password = ref('')
 
 function handleLogin() {
-  user.name = "SXY"
+  user.name = 'SXY'
   user.is_login = true
   user.email = email.value
-  user.isAdmin=0
-  user.token="aaaaaaaaaaaa"
-  user.password="123456"
+  user.isAdmin = 0
+  user.token = 'aaaaaaaaaaaa'
+  user.password = '123456'
   router.push('/')
 }
 </script>
