@@ -41,7 +41,7 @@
               to="/profile"
               class="btn btn-danger ms-lg-2 mt-2 mt-lg-0"
               style="border-radius: 10px"
-              ><i class="fas fa-sign-out-alt me-2"></i>{{user.name}}
+              ><i class="fas fa-sign-out-alt me-2"></i>{{ user.name }}
             </router-link>
           </li>
         </ul>
