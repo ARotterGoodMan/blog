@@ -15,7 +15,7 @@
         </div>
         <div class="mb-3">
           <label class="form-label">用户名</label>
-          <p class="form-control">{{ userdata.name }}</p>
+          <p class="form-control">{{ userdata.username }}</p>
         </div>
         <div class="mb-3">
           <label class="form-label">邮箱</label>
@@ -23,8 +23,8 @@
         </div>
 
         <div class="mb-3">
-          <label class="form-label">密码</label>
-          <p class="form-control">{{ userdata.password }}</p>
+          <label class="form-label">手机号</label>
+          <p class="form-control">{{ userdata.phone }}</p>
         </div>
 
         <div class="d-flex justify-content-between mt-3">
@@ -41,15 +41,15 @@
       <div v-else>
         <div class="mb-3">
           <label class="form-label">用户名</label>
-          <input v-model="editableUser.name" type="text" class="form-control" />
+          <input v-model="editableUser.username" type="text" class="form-control"/>
         </div>
         <div class="mb-3">
           <label class="form-label">邮箱</label>
-          <input v-model="editableUser.email" type="email" class="form-control" />
+          <input v-model="editableUser.email" type="email" class="form-control"/>
         </div>
         <div class="mb-3">
-          <label class="form-label">密码</label>
-          <input v-model="editableUser.password" type="password" class="form-control" />
+          <label class="form-label">手机号</label>
+          <input v-model="editableUser.phone" type="password" class="form-control"/>
         </div>
         <div class="mb-3">
           <label class="form-label">头像</label>
@@ -74,35 +74,43 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
-import global from '@/config/global.ts'
+import {ref} from 'vue'
+import {useGlobalStore} from "@/config/global";
 import router from '@/router'
+import {Serverd} from "@/tools/Server.ts";
+
+const global = useGlobalStore()
 
 interface User {
-  name: string
+  username: string
   email: string
   avatar: string
-  password: string
+  phone: string
   isAdmin: number
   token: string
+  is_login: boolean
 }
 
 const userdata = ref<User>(global.user)
 
-const editableUser = ref<User>({ ...global.user })
+const editableUser = ref<User>({...global.user})
 const isEditing = ref(false)
 
 function toggleLogout() {
-  global.user.is_login = false
-  global.user.name = ''
-  global.user.email = ''
-  global.user.avatar = ''
-  global.user.password = ''
-  global.user.isAdmin = 0
-  global.user.token = ''
-  userdata.value = { ...global.user }
-  editableUser.value = { ...global.user }
   sessionStorage.removeItem('user')
+  Serverd.logout()
+  global.setUser({
+    username: '',
+    email: '',
+    avatar: '',
+    phone: '',
+    isAdmin: 0,
+    token: '',
+    is_login: false
+  })
+  sessionStorage.setItem('user', JSON.stringify(global.user))
+  userdata.value = {...global.user}
+  editableUser.value = {...global.user}
   router.push('/')
 }
 
@@ -111,14 +119,18 @@ function toggleEditMode() {
 }
 
 function saveChanges() {
-  global.user.name = editableUser.value.name
-  global.user.email = editableUser.value.email
-  global.user.avatar = editableUser.value.avatar
-  global.user.password = editableUser.value.password
-  global.user.isAdmin = editableUser.value.isAdmin
-  global.user.token = editableUser.value.token
-  userdata.value = { ...global.user }
-  editableUser.value = { ...global.user }
+  global.setUser({
+    username: editableUser.value.username,
+    email: editableUser.value.email,
+    avatar: editableUser.value.avatar,
+    phone: editableUser.value.phone,
+    isAdmin: editableUser.value.isAdmin,
+    token: editableUser.value.token,
+    is_login: true
+  })
+  sessionStorage.setItem('user', JSON.stringify(global.user))
+  userdata.value = {...global.user}
+  editableUser.value = {...global.user}
   toggleEditMode()
   alert('信息已更新！')
 }

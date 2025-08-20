@@ -5,15 +5,19 @@
       <form @submit.prevent="handleRegister">
         <div class="mb-3">
           <label class="form-label">用户名</label>
-          <input v-model="username" type="text" class="form-control" required />
+          <input v-model="username" type="text" class="form-control" required/>
         </div>
         <div class="mb-3">
           <label class="form-label">邮箱</label>
-          <input v-model="email" type="email" class="form-control" required />
+          <input v-model="email" type="email" class="form-control" required/>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">手机号</label>
+          <input v-model="phone" type="tel" class="form-control" required/>
         </div>
         <div class="mb-3">
           <label class="form-label">密码</label>
-          <input v-model="password" type="password" class="form-control" required />
+          <input v-model="password" type="password" class="form-control" required/>
         </div>
         <button type="submit" class="btn btn-success w-100">注册</button>
       </form>
@@ -25,10 +29,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 
 const username = ref('')
 const email = ref('')
+const phone = ref('')
 const password = ref('')
 
 function handleRegister() {

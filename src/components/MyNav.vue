@@ -3,7 +3,7 @@
     <div class="container">
       <!-- 左侧Logo -->
       <a class="navbar-brand" href="#">
-        <img src="../assets/img/logo.png" style="width: 35px" />
+        <img src="../assets/img/logo.png" style="width: 35px"/>
       </a>
 
       <!-- 汉堡菜单按钮 -->
@@ -29,11 +29,13 @@
             </li>
           </template>
           <li class="nav-item" v-if="!user.is_login">
+
             <router-link
               to="/login"
               class="btn btn-primary ms-lg-2 mt-2 mt-lg-0"
               style="border-radius: 10px"
-              ><i class="fas fa-sign-in-alt me-2"></i>登录</router-link
+            ><i class="fas fa-sign-in-alt me-2"></i>登录
+            </router-link
             >
           </li>
           <li class="nav-item" v-if="user.is_login">
@@ -41,7 +43,7 @@
               to="/profile"
               class="btn btn-danger ms-lg-2 mt-2 mt-lg-0"
               style="border-radius: 10px"
-              ><i class="fas fa-sign-out-alt me-2"></i>{{ user.name }}
+            ><i class="fas fa-sign-out-alt me-2"></i>{{ user.username }}
             </router-link>
           </li>
         </ul>
@@ -51,8 +53,11 @@
 </template>
 
 <script lang="ts" setup>
-import { type RouteRecordName, useRoute } from 'vue-router'
-import global from '@/config/global.ts'
+import {useGlobalStore} from "@/config/global";
+import {type RouteRecordName, useRoute} from 'vue-router'
+
+const globalStore = useGlobalStore();
+
 
 const props = defineProps<{
   nav_items: Array<{
@@ -73,7 +78,8 @@ const isActive = (path: string) => {
   }
 }
 
-const user = global.user
+const user = globalStore.user;
+
 </script>
 
 <style scoped>

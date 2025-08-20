@@ -1,5 +1,5 @@
-import global from '@/config/global.ts'
-import { createRouter, createWebHistory } from 'vue-router'
+import {useGlobalStore} from '@/config/global.ts'
+import {createRouter, createWebHistory} from 'vue-router'
 import Index from '@/views/MyIndex.vue'
 import Notes from '@/views/MyNotes.vue'
 import Blog from '@/views/Blog/MyBlog.vue'
@@ -44,6 +44,7 @@ const router = createRouter({
       },
       beforeEnter: (to, from, next) => {
         // 检查用户是否已登录
+        const global = useGlobalStore()
         const isLoggedIn = global.user.is_login
         const isAdmin = global.user.isAdmin
         if (isAdmin > 0) {
@@ -73,6 +74,7 @@ const router = createRouter({
       component: Profile,
       beforeEnter: (to, from, next) => {
         // 检查用户是否已登录
+        const global = useGlobalStore()
         const isLoggedIn = global.user.is_login
         if (isLoggedIn) {
           next() // 已登录，允许访问
