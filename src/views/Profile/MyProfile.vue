@@ -111,14 +111,14 @@ function toggleEditMode() {
 }
 
 function saveChanges() {
-  user.name = editableUser.value.name
-  user.email = editableUser.value.email
-  user.avatar = editableUser.value.avatar
-  user.password = editableUser.value.password
-  user.isAdmin = editableUser.value.isAdmin
-  user.token = editableUser.value.token
-  userdata.value = { ...user }
-  editableUser.value = { ...user }
+  global.user.name = editableUser.value.name
+  global.user.email = editableUser.value.email
+  global.user.avatar = editableUser.value.avatar
+  global.user.password = editableUser.value.password
+  global.user.isAdmin = editableUser.value.isAdmin
+  global.user.token = editableUser.value.token
+  userdata.value = { ...global.user }
+  editableUser.value = { ...global.user }
   toggleEditMode()
   alert('信息已更新！')
 }
