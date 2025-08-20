@@ -1,4 +1,4 @@
-import user from '@/config/global.ts'
+import global from '@/config/global.ts'
 import { createRouter, createWebHistory } from 'vue-router'
 import Index from '@/views/MyIndex.vue'
 import About from '@/views/MyAbout.vue'
@@ -47,8 +47,8 @@ const router = createRouter({
       },
       beforeEnter: (to, from, next) => {
         // 检查用户是否已登录
-        const isLoggedIn = user.is_login
-        const isAdmin = user.isAdmin
+        const isLoggedIn = global.user.is_login
+        const isAdmin = global.user.isAdmin
         if (isAdmin > 0) {
           next() // 已登录，允许访问
         } else if (isLoggedIn) {
@@ -75,7 +75,7 @@ const router = createRouter({
       component: Profile,
       beforeEnter: (to, from, next) => {
         // 检查用户是否已登录
-        const isLoggedIn = user.is_login
+        const isLoggedIn = global.user.is_login
         if (isLoggedIn) {
           next() // 已登录，允许访问
         } else {
