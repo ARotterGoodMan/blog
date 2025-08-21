@@ -1,23 +1,24 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container">
+    <div class="container"
+    >
       <!-- 左侧Logo -->
-      <a class="navbar-brand" href="#">
+      <router-link class="navbar-brand" to="/">
         <img src="../assets/img/logo.png" style="width: 35px"/>
-      </a>
+      </router-link>
 
       <!-- 汉堡菜单按钮 -->
       <button
         class="navbar-toggler"
         type="button"
-        data-bs-toggle="collapse"
         data-bs-target="#navbarNav"
+        data-bs-toggle="collapse"
       >
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <!-- 导航菜单 -->
-      <div class="collapse navbar-collapse" id="navbarNav">
+      <div :class="isShow?'collapse navbar-collapse show':'collapse navbar-collapse'" id="navbarNav">
         <!-- 右侧导航菜单 - 使用ms-auto实现右对齐 -->
         <ul class="navbar-nav ms-auto">
           <template v-for="item in props.nav_items">
@@ -29,10 +30,9 @@
             </li>
           </template>
           <li class="nav-item" v-if="!user.is_login">
-
             <router-link
               to="/login"
-              class="btn btn-primary ms-lg-2 mt-2 mt-lg-0"
+              class="nav-link not_login"
               style="border-radius: 10px"
             ><i class="fas fa-sign-in-alt me-2"></i>登录
             </router-link
@@ -41,8 +41,7 @@
           <li class="nav-item" v-if="user.is_login">
             <router-link
               to="/profile"
-              class="btn btn-danger ms-lg-2 mt-2 mt-lg-0"
-              style="border-radius: 10px"
+              class="nav-link login"
             ><i class="fas fa-sign-out-alt me-2"></i>{{ user.username }}
             </router-link>
           </li>
@@ -53,11 +52,12 @@
 </template>
 
 <script lang="ts" setup>
+import {ref} from 'vue';
 import {useGlobalStore} from "@/config/global";
 import {type RouteRecordName, useRoute} from 'vue-router'
 
 const globalStore = useGlobalStore();
-
+let isShow = ref(false);
 
 const props = defineProps<{
   nav_items: Array<{
@@ -80,6 +80,10 @@ const isActive = (path: string) => {
 
 const user = globalStore.user;
 
+const navbarNavShow = () => {
+  isShow.value =!isShow.value
+}
+
 </script>
 
 <style scoped>
@@ -90,7 +94,6 @@ const user = globalStore.user;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
   transition: all 0.4s ease;
 }
-
 .navbar-brand {
   display: flex;
   align-items: center;
@@ -133,5 +136,16 @@ const user = globalStore.user;
 
 .navbar-toggler:focus {
   box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.4);
+}
+.login,
+.login:hover {
+  background: rgba(255,0,0,.6);
+  color: #fff !important;
+}
+
+.not_login,
+.not_login:hover {
+  background: rgba(14, 224, 113, 0.6);
+  color: #fff !important;
 }
 </style>

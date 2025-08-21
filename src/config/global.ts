@@ -2,7 +2,7 @@
 import {defineStore} from "pinia";
 
 
-export const useGlobalStore = defineStore("global", {
+const useGlobalStore = defineStore("global", {
   state: () => ({
     user: {
       username: "",
@@ -38,16 +38,7 @@ export const useGlobalStore = defineStore("global", {
   },
 });
 
-if (JSON.parse(<string>sessionStorage.getItem("user"))) {
-  const data = JSON.parse(<string>sessionStorage.getItem("user"));
-  useGlobalStore().setUser({
-    username: data.username,
-    email: data.email,
-    phone: data.phone,
-    token: data.token,
-    avatar: data.avatar,
-    isAdmin: data.isAdmin,
-    is_login: data.is_login
-  });
-}
 
+
+
+export {useGlobalStore}

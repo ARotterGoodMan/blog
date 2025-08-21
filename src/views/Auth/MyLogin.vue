@@ -1,5 +1,6 @@
 <template>
-  <div class="container d-flex justify-content-center align-items-center vh-100">
+  <main>
+    <div class="container d-flex justify-content-center align-items-center">
     <div class="card p-4 shadow" style="width: 360px">
       <h3 class="text-center mb-3"><i class="fas fa-sign-in-alt"></i> 登录</h3>
       <form @submit.prevent="handleLogin">
@@ -11,6 +12,10 @@
           <label class="form-label">密码</label>
           <input v-model="password" type="password" class="form-control" required/>
         </div>
+        <!-- 密码错误显示 -->
+        <div v-if="errorMessage" class="alert alert-danger">
+          {{ errorMessage }}
+        </div>
         <button type="submit" class="btn btn-primary w-100">登录</button>
       </form>
       <div class="d-flex justify-content-between mt-3">
@@ -19,6 +24,8 @@
       </div>
     </div>
   </div>
+  </main>
+
 </template>
 
 <script lang="ts" setup>
@@ -29,7 +36,7 @@ import {Serverd} from "@/tools/Server.ts";
 
 const email = ref('')
 const password = ref('')
-
+let errorMessage = ref('')
 const global = useGlobalStore();
 
 function handleLogin() {
@@ -39,10 +46,23 @@ function handleLogin() {
         // 登录成功，设置用户信息
         console.log(response.data.data)
         if (response.data.status !== 200) {
+          errorMessage.value= '登录失败，请检查邮箱和密码。'
+          setTimeout(()=>{
+            errorMessage.value = ''
+          }, 3000)
           console.log('登录失败，请检查邮箱和密码。')
           return
         }
-        sessionStorage.setItem('user', JSON.stringify(response.data.data))
+        let userData = {
+          username: response.data.data.username || '',
+          email: response.data.data.email || '',
+          phone: response.data.data.phone || '',
+          token: response.data.data.token || '',
+          avatar: response.data.data.avatar || '',
+          isAdmin: response.data.data.is_admin || 0,
+          is_login: true,
+        }
+        sessionStorage.setItem('user', JSON.stringify(userData))
         let data: {
           username: string
           email: string
@@ -53,7 +73,7 @@ function handleLogin() {
           is_login: boolean
         } = {
           is_login: true,
-          isAdmin: response.data.data.isAdmin || false,
+          isAdmin: response.data.data.is_admin || 0,
           username: response.data.data.username || '',
           email: response.data.data.email || '',
           avatar: response.data.data.avatar || '',
@@ -61,6 +81,7 @@ function handleLogin() {
           phone: response.data.data.phone || '',
         }
         global.setUser(data)
+        router.push('/')
 
       } else {
         console.log('登录失败，请检查邮箱和密码。')
@@ -71,7 +92,5 @@ function handleLogin() {
       console.log('登录失败，请稍后再试。')
     })
 
-
-  router.push('/')
 }
 </script>

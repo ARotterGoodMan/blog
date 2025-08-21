@@ -1,4 +1,5 @@
 import axios from 'axios'
+import {useGlobalStore} from "@/config/global.ts";
 
 class Server {
   constructor() {
@@ -14,11 +15,20 @@ class Server {
   }
 
   public logout = () => {
+    const globalStore= useGlobalStore();
     axios.post('/logout', {}, {
       headers: {
-        'Authorization': ``
+        'Authorization': `${globalStore.user.token}`
       }
     });
+  }
+  public register= (data:{
+    username: string
+    email: string,
+    password: string
+    phone: string
+  }) => {
+    return axios.post('/register', data);
   }
 
 }

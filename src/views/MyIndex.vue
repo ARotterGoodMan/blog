@@ -1,5 +1,5 @@
 <template>
-  <main style="margin-bottom: 55px">
+  <main>
     <div class="container">
       <div class="row">
         <section class="col-md-8">

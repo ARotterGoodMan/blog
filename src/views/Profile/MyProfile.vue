@@ -1,5 +1,6 @@
 <template>
-  <div class="container d-flex justify-content-center align-items-center vh-100">
+  <main>
+     <div class="container d-flex justify-content-center align-items-center">
     <div class="card p-4 shadow" style="width: 500px">
       <h3 class="text-center mb-3"><i class="fas fa-user"></i> 个人信息</h3>
 
@@ -44,12 +45,12 @@
           <input v-model="editableUser.username" type="text" class="form-control"/>
         </div>
         <div class="mb-3">
-          <label class="form-label">邮箱</label>
-          <input v-model="editableUser.email" type="email" class="form-control"/>
+          <label class="form-label">邮箱 <span style="color:#f00;font-size: .75rem">用于登录无法修改</span></label>
+          <input v-model="editableUser.email" type="email" class="form-control" disabled/>
         </div>
         <div class="mb-3">
           <label class="form-label">手机号</label>
-          <input v-model="editableUser.phone" type="password" class="form-control"/>
+          <input v-model="editableUser.phone" type="text" class="form-control"/>
         </div>
         <div class="mb-3">
           <label class="form-label">头像</label>
@@ -71,6 +72,8 @@
       </div>
     </div>
   </div>
+  </main>
+
 </template>
 
 <script lang="ts" setup>
