@@ -19,7 +19,7 @@
           <div class="sidebar">
             <div class="search-widget">
               <div class="input-group margin-bottom-sm">
-                <input class="form-control" type="text" placeholder="查询信息" />
+                <input class="form-control" type="text" placeholder="查询信息"/>
                 <a href="#" class="input-group-addon" @click="search">
                   <i class="fa fa-search fa-fw" style="width: 50px; line-height: 50px"></i>
                 </a>
@@ -39,7 +39,7 @@
             <div class="subscribe-widget">
               <h4 class="text-capitalize text-center">通过电子邮件联系我</h4>
               <div class="input-group margin-bottom-sm">
-                <input class="form-control" type="text" placeholder="你的邮箱" />
+                <input class="form-control" type="text" placeholder="你的邮箱"/>
                 <a href="#" class="input-group-addon" @click="mail_to_me">
                   <i class="fa fa-paper-plane fa-fw" style="width: 50px; line-height: 50px"></i>
                 </a>

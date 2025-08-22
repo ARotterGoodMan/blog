@@ -1,4 +1,3 @@
-// src/stores/global.ts
 import {defineStore} from "pinia";
 
 
@@ -7,7 +6,6 @@ const useGlobalStore = defineStore("global", {
     user: {
       username: "",
       email: "",
-      phone: "",
       token: "",
       avatar: "",
       isAdmin: 0,
@@ -20,7 +18,6 @@ const useGlobalStore = defineStore("global", {
             {
               username: string
               email: string
-              phone: string
               token: string
               avatar: string
               isAdmin: number
@@ -29,7 +26,6 @@ const useGlobalStore = defineStore("global", {
     ) {
       this.user.username = data.username
       this.user.email = data.email
-      this.user.phone = data.phone
       this.user.token = data.token
       this.user.avatar = data.avatar
       this.user.isAdmin = data.isAdmin
@@ -37,8 +33,6 @@ const useGlobalStore = defineStore("global", {
     },
   },
 });
-
-
 
 
 export {useGlobalStore}

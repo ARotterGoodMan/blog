@@ -7,28 +7,51 @@ class Server {
     axios.defaults.baseURL = url;
   }
 
-  public login = (email: string, password: string) => {
+  public login = (email: string, password: string, ip: string) => {
     return axios.post('/login', {
       email,
-      password
+      password,
+      ip_address: ip
     });
   }
 
   public logout = () => {
-    const globalStore= useGlobalStore();
+    const globalStore = useGlobalStore();
     axios.post('/logout', {}, {
       headers: {
         'Authorization': `${globalStore.user.token}`
       }
     });
   }
-  public register= (data:{
+  public register = (data: {
     username: string
     email: string,
     password: string
-    phone: string
   }) => {
     return axios.post('/register', data);
+  }
+
+  public getAllUsers = () => {
+    const globalStore = useGlobalStore();
+    return axios.post('/get_all', {}, {
+      headers: {
+        'Authorization': `${globalStore.user.token}`
+      }
+    });
+  }
+  public updateUser = (data: {
+    id?: number
+    username: string
+    email: string
+    password?: string
+    Admin?: number
+  }) => {
+    const globalStore = useGlobalStore();
+    return axios.post('/updateUser', data, {
+      headers: {
+        'Authorization': `${globalStore.user.token}`
+      }
+    });
   }
 
 }

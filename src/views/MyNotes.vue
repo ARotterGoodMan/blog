@@ -142,8 +142,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted, watch, computed, onUnmounted } from 'vue'
-import { MdEditor } from 'md-editor-v3'
+import {ref, reactive, onMounted, watch, computed, onUnmounted} from 'vue'
+import {MdEditor} from 'md-editor-v3'
 import 'md-editor-v3/lib/style.css'
 
 interface Note {
@@ -244,7 +244,7 @@ watch(
       lastSaved.value = new Date().toLocaleString()
     }, 1000) as unknown as number
   },
-  { deep: true },
+  {deep: true},
 )
 
 // 检查笔记是否当前活动笔记
@@ -325,7 +325,7 @@ async function saveNotes(): Promise<void> {
     const index = notes.value.findIndex((n) => n.id === currentNote.id)
     if (index !== -1) {
       currentNote.updatedAt = new Date().toISOString()
-      notes.value[index] = { ...currentNote }
+      notes.value[index] = {...currentNote}
     }
 
     // 显示保存反馈

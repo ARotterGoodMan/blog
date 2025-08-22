@@ -1,49 +1,57 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container"
-    >
-      <!-- 左侧Logo -->
+    <div class="container">
       <router-link class="navbar-brand" to="/">
         <img src="../assets/img/logo.png" style="width: 35px"/>
       </router-link>
 
-      <!-- 汉堡菜单按钮 -->
       <button
         class="navbar-toggler"
         type="button"
-        data-bs-target="#navbarNav"
         data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
       >
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- 导航菜单 -->
-      <div :class="isShow?'collapse navbar-collapse show':'collapse navbar-collapse'" id="navbarNav">
-        <!-- 右侧导航菜单 - 使用ms-auto实现右对齐 -->
+      <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <template v-for="item in props.nav_items">
-            <li class="nav-item" :key="item.path" v-if="item.type <= user.isAdmin">
-              <router-link :to="item.path" :class="'nav-link ' + isActive(item.path)">
-                <i :class="item.icon + ' me-2'"></i>
-                {{ item.name }}
+          <template v-for="item in props.nav_items" :key="item.path">
+            <li class="nav-item" v-if="item.type <= user.isAdmin">
+              <router-link
+                :to="item.path"
+                class="nav-link"
+                :class="{ active: isActive(item.path) }"
+              >
+                <i :class="item.icon + ' me-2'"></i>{{ item.name }}
               </router-link>
             </li>
           </template>
+
           <li class="nav-item" v-if="!user.is_login">
-            <router-link
-              to="/login"
-              class="nav-link not_login"
-              style="border-radius: 10px"
-            ><i class="fas fa-sign-in-alt me-2"></i>登录
-            </router-link
-            >
-          </li>
-          <li class="nav-item" v-if="user.is_login">
-            <router-link
-              to="/profile"
-              class="nav-link login"
-            ><i class="fas fa-sign-out-alt me-2"></i>{{ user.username }}
+            <router-link to="/login" class="nav-link not_login">
+              <i class="fas fa-sign-in-alt me-2"></i>登录
             </router-link>
+          </li>
+
+          <li class="nav-item dropdown" v-if="user.is_login">
+            <a
+              class="nav-link dropdown-toggle login"
+              href="#"
+              id="navbardrop"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              <i class="fas fa-user me-2"></i>{{ user.username }}
+            </a>
+            <div class="dropdown-menu">
+              <router-link class="dropdown-item" to="#" @click="toggleLogout">退出</router-link>
+              <router-link class="dropdown-item" to="/profile">个人信息</router-link>
+            </div>
           </li>
         </ul>
       </div>
@@ -52,13 +60,13 @@
 </template>
 
 <script lang="ts" setup>
-import {ref} from 'vue';
+import router from "@/router";
 import {useGlobalStore} from "@/config/global";
+import {Serverd} from "@/tools/Server.ts";
 import {type RouteRecordName, useRoute} from 'vue-router'
 
-const globalStore = useGlobalStore();
-let isShow = ref(false);
 
+const global = useGlobalStore();
 const props = defineProps<{
   nav_items: Array<{
     name: RouteRecordName
@@ -69,22 +77,27 @@ const props = defineProps<{
 }>()
 
 const currentRoute = useRoute()
+const user = global.user;
 
-const isActive = (path: string) => {
-  if (path === currentRoute.path) {
-    return 'active'
-  } else {
-    return ''
-  }
-}
+const isActive = (path: string) => path === currentRoute.path;
 
-const user = globalStore.user;
 
-const navbarNavShow = () => {
-  isShow.value =!isShow.value
+function toggleLogout() {
+  sessionStorage.removeItem('user')
+  Serverd.logout()
+  global.setUser({
+    username: '',
+    email: '',
+    avatar: '',
+    isAdmin: 0,
+    token: '',
+    is_login: false
+  })
+  router.push('/')
 }
 
 </script>
+
 
 <style scoped>
 .navbar {
@@ -94,6 +107,7 @@ const navbarNavShow = () => {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
   transition: all 0.4s ease;
 }
+
 .navbar-brand {
   display: flex;
   align-items: center;
@@ -137,9 +151,10 @@ const navbarNavShow = () => {
 .navbar-toggler:focus {
   box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.4);
 }
+
 .login,
 .login:hover {
-  background: rgba(255,0,0,.6);
+  background: rgba(255, 0, 0, .6);
   color: #fff !important;
 }
 
@@ -147,5 +162,49 @@ const navbarNavShow = () => {
 .not_login:hover {
   background: rgba(14, 224, 113, 0.6);
   color: #fff !important;
+}
+
+
+.dropdown-menu {
+  background-color: rgba(30, 30, 40, 0.95);
+  border-radius: 10px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.25s ease;
+  visibility: hidden;
+  display: block;
+  position: absolute;
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+}
+
+
+.dropdown-menu {
+  display: none;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.95);
+  transition: all 0.25s ease;
+  transform-origin: top;
+}
+
+.dropdown-menu.show {
+  display: block;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+
+.dropdown-menu .dropdown-item {
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.3s ease;
+}
+
+.dropdown-menu .dropdown-item:hover {
+  background: rgba(77, 171, 247, 0.15);
+  color: #74c0fc;
 }
 </style>
