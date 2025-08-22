@@ -147,7 +147,8 @@
                 {{ ModalAlert }}
               </div>
               <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消
+                </button>
                 <button type="submit" class="btn btn-primary">保存</button>
               </div>
             </form>
@@ -236,6 +237,7 @@ watch([searchQuery, roleFilter, itemsPerPage], () => {
 
 // 删除用户
 function deleteUser(user: User) {
+
   if (confirm(`确定要删除用户 ${user.username} 吗？`)) {
     users.value = users.value.filter(u => u.email !== user.email);
     if (currentPage.value > totalPages.value) currentPage.value = totalPages.value;
@@ -263,10 +265,6 @@ function saveUser() {
   if (editingUser.value) {
     const index = users.value.findIndex(u => u.email === editingUser.value?.email);
     if (index !== -1) {
-      users.value[index] = {
-        ...tempUser.value,
-        password: tempUser.value.password || users.value[index].password
-      };
       Serverd.updateUser({
         id: users.value[index].id,
         username: tempUser.value.username,
@@ -277,6 +275,10 @@ function saveUser() {
         showAlert("用户修改成功！", 2000, () => {
           bsModal?.hide();
         });
+        users.value[index] = {
+          ...tempUser.value,
+          password: tempUser.value.password || users.value[index].password
+        };
       }).catch((error) => {
         console.error("修改用户失败:", error);
         alert("修改用户失败，请稍后再试。");
