@@ -10,6 +10,7 @@
                  placeholder="搜索用户名 / 邮箱 / 手机号" style="max-width: 250px"/>
           <select v-model="roleFilter" class="form-select" style="max-width: 150px">
             <option value="">全部角色</option>
+            <option value="2">超级管理员</option>
             <option value="1">管理员</option>
             <option value="0">用户</option>
           </select>
@@ -37,9 +38,10 @@
               <td>{{ user.username }}</td>
               <td>{{ user.email }}</td>
               <td>
-                <span class="badge" :class="user.role === 1 ? 'bg-danger' : 'bg-secondary'">
-                  {{ user.role === 1 ? '管理员' : '用户' }}
-                </span>
+                 <span class="badge"
+                       :class="user.role === 2 ? 'bg-primary' : user.role === 1 ? 'bg-danger' : 'bg-secondary'">
+                {{ user.role === 2 ? '超级管理员' : user.role === 1 ? '管理员' : '用户' }}
+              </span>
               </td>
               <td>
                 <button class="btn btn-sm btn-outline-primary me-2" @click="openEditModal(user)">
@@ -63,8 +65,9 @@
           <div class="card-body">
             <h5 class="card-title d-flex justify-content-between">
               <span>{{ user.username }}</span>
-              <span class="badge" :class="user.role === 1 ? 'bg-danger' : 'bg-secondary'">
-                {{ user.role === 1 ? '管理员' : '用户' }}
+              <span class="badge"
+                    :class="user.role === 2 ? 'bg-primary' : user.role === 1 ? 'bg-danger' : 'bg-secondary'">
+                {{ user.role === 2 ? '超级管理员' : user.role === 1 ? '管理员' : '用户' }}
               </span>
             </h5>
             <p class="mb-1"><i class="fas fa-envelope me-2"></i>{{ user.email }}</p>
@@ -140,6 +143,7 @@
                   <select v-model.number="tempUser.role" class="form-select" required>
                     <option :value="1">管理员</option>
                     <option :value="0">用户</option>
+                    <option v-if="editingUser?.role === 2" :value="2">超级管理员</option>
                   </select>
                 </div>
               </div>
@@ -156,24 +160,64 @@
         </div>
       </div>
 
+
+      <!-- 通用确认模态框 -->
+      <div class="modal fade" id="confirmModal" tabindex="-1" ref="confirmModalRef">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{{ confirmTitle }}</h5>
+              <button type="button" class="btn-close" @click="cancelConfirm"></button>
+            </div>
+            <div class="modal-body">
+              <p>{{ confirmMessage }}</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" @click="cancelConfirm"
+                      v-if="confirmTitle!='操作失败'">取消
+              </button>
+              <button type="button" class="btn btn-primary" @click="confirmOk">确定</button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </main>
 </template>
 
+
 <script setup lang="ts">
-import {ref, computed, watch, onMounted} from "vue";
-import {Modal} from "bootstrap";
-import {Serverd} from "@/tools/Server.ts";
+
+import {ref, computed, watch, onMounted} from "vue"
+import {Modal} from "bootstrap"
+import {Serverd} from "@/tools/Server.ts"
+import {useGlobalStore} from "@/config/global.ts"
+
+const global = useGlobalStore();
 
 interface User {
   id: number;
   username: string;
   email: string;
-  role: 0 | 1;
+  role: 0 | 1 | 2; // 0: 普通用户, 1: 管理员, 2: 超级管理员
   password?: string;
 }
 
-const users = ref<User[]>([]);
+const users = ref<User[]>([])
+const searchQuery = ref("")
+const roleFilter = ref<string | "">("")
+const itemsPerPage = ref(5)
+const currentPage = ref(1)
+const ModalAlert = ref("")
+const editingUser = ref<User | null>(null)
+const tempUser = ref<User>({id: 0, username: "", email: "", role: 0, password: ""})
+const editModalRef = ref<HTMLDivElement | null>(null)
+let bsModal: Modal | null = null
+const confirmModalRef = ref<HTMLDivElement | null>(null)
+let confirmModal: Modal | null = null
+const confirmMessage = ref("")
+const confirmTitle = ref("")
+let confirmResolve: ((val: boolean) => void) | null = null
 
 // 获取后端用户列表
 Serverd.getAllUsers().then((res) => {
@@ -184,85 +228,128 @@ Serverd.getAllUsers().then((res) => {
     role: user.is_admin,
     password: user.password
   }));
-});
-
-const searchQuery = ref("");
-const roleFilter = ref<string | "">("");
-const itemsPerPage = ref(5);
-const currentPage = ref(1);
-const ModalAlert = ref(""); // 提示信息
-const editingUser = ref<User | null>(null);
-const tempUser = ref<User>({id: 0, username: "", email: "", role: 0, password: ""});
-const editModalRef = ref<HTMLDivElement | null>(null);
-let bsModal: Modal | null = null;
+})
 
 // 初始化模态框
 onMounted(() => {
   if (editModalRef.value) {
-    bsModal = new Modal(editModalRef.value, {backdrop: 'static'});
+    bsModal = new Modal(editModalRef.value, {backdrop: 'static'})
+  }
+  if (confirmModalRef.value) {
+    confirmModal = new Modal(confirmModalRef.value, {backdrop: 'static'})
   }
 });
 
 // 过滤后的用户
 const filteredUsers = computed(() =>
   users.value.filter(u => {
-    const matchesSearch = u.username.includes(searchQuery.value) || u.email.includes(searchQuery.value);
-    const matchesRole = roleFilter.value === "" ? true : u.role === Number(roleFilter.value);
-    return matchesSearch && matchesRole;
+    const matchesSearch = u.username.includes(searchQuery.value) || u.email.includes(searchQuery.value)
+    const matchesRole = roleFilter.value === "" ? true : u.role === Number(roleFilter.value)
+    return matchesSearch && matchesRole
   })
 );
 
 // 总页数
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / itemsPerPage.value)));
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / itemsPerPage.value)))
 
 // 分页后的用户
 const paginatedUsers = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  return filteredUsers.value.slice(start, start + itemsPerPage.value);
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  return filteredUsers.value.slice(start, start + itemsPerPage.value)
 });
 
 // 翻页
 function prevPage() {
-  if (currentPage.value > 1) currentPage.value--;
+  if (currentPage.value > 1) currentPage.value--
 }
 
 function nextPage() {
-  if (currentPage.value < totalPages.value) currentPage.value++;
+  if (currentPage.value < totalPages.value) currentPage.value++
 }
 
-// 搜索/筛选/分页数量改变重置页码
 watch([searchQuery, roleFilter, itemsPerPage], () => {
-  currentPage.value = 1;
+  currentPage.value = 1
 });
 
-// 删除用户
-function deleteUser(user: User) {
+function showConfirm(title: string, msg: string): Promise<boolean> {
+  confirmTitle.value = title
+  confirmMessage.value = msg
+  confirmModal?.show()
+  return new Promise((resolve) => {
+    confirmResolve = resolve
+  })
+}
 
-  if (confirm(`确定要删除用户 ${user.username} 吗？`)) {
-    users.value = users.value.filter(u => u.email !== user.email);
-    if (currentPage.value > totalPages.value) currentPage.value = totalPages.value;
+
+function confirmOk() {
+  confirmModal?.hide()
+  if (confirmResolve) confirmResolve(true)
+}
+
+function cancelConfirm() {
+  confirmModal?.hide()
+  if (confirmResolve) confirmResolve(false)
+}
+
+// 删除用户
+async function deleteUser(user: any) {
+  if (user.role === 2) {
+    await showConfirm("操作失败", "不能删除超级管理员用户")
+    return
   }
+  if (user.email === "当前登录用户") {
+    await showConfirm("操作失败", "不能删除当前登录用户")
+    return
+  }
+  if (1 === 1 && user.role >= 1) { // 你的权限判断逻辑
+    await showConfirm("操作失败", "管理员不能删除管理员或超级管理员")
+    return
+  }
+
+  const ok = await showConfirm("操作确认", `确定要删除用户 ${user.username} 吗？`)
+  if (!ok) return
+
+  // 删除逻辑
 }
 
 // 打开编辑/新增模态框
 function openEditModal(user: User | null) {
-  editingUser.value = user;
-  tempUser.value = user ? {...user} : {id: 0, username: "", email: "", role: 0, password: ""};
+  editingUser.value = user
+  tempUser.value = user ? {...user} : {id: 0, username: "", email: "", role: 0, password: ""}
+
+  // 限制管理员不能编辑更高级角色
+  if (global.user.isAdmin === 1 && user && user.role >= 1) {
+    showConfirm("操作失败", "没有权限编辑管理员或超级管理员")
+    return
+  }
+
   bsModal?.show();
 }
 
 // 显示提示信息
 function showAlert(msg: string, duration = 3000, callback?: () => void) {
-  ModalAlert.value = msg;
+  ModalAlert.value = msg
   setTimeout(() => {
-    ModalAlert.value = "";
-    if (callback) callback();
-  }, duration);
+    ModalAlert.value = ""
+    if (callback) callback()
+  }, duration)
 }
 
 // 保存用户
 function saveUser() {
   if (editingUser.value) {
+    // 防止超级管理员被降级
+    if (editingUser.value.role === 2 && tempUser.value.role !== 2) {
+      showConfirm("操作失败", "不能修改超级管理员的角色")
+      return
+    }
+
+    // 权限控制：管理员不能修改管理员或超级管理员
+    if (global.user.isAdmin === 1 && editingUser.value.role >= 1) {
+      showConfirm("操作失败", "没有权限修改管理员或超级管理员")
+      return
+    }
+
     const index = users.value.findIndex(u => u.email === editingUser.value?.email);
     if (index !== -1) {
       Serverd.updateUser({
@@ -273,39 +360,43 @@ function saveUser() {
         password: tempUser.value.password || users.value[index].password
       }).then(() => {
         showAlert("用户修改成功！", 2000, () => {
-          bsModal?.hide();
+          bsModal?.hide()
         });
         users.value[index] = {
           ...tempUser.value,
           password: tempUser.value.password || users.value[index].password
-        };
+        }
       }).catch((error) => {
-        console.error("修改用户失败:", error);
-        alert("修改用户失败，请稍后再试。");
-      });
-      showAlert("用户修改成功！", 2000, () => {
-        bsModal?.hide();
+        console.error("修改用户失败:", error)
+        alert("修改用户失败，请稍后再试。")
       });
     }
   } else {
     if (!tempUser.value.password) {
-      alert("请设置密码");
-      return;
+      showConfirm("修改错误", "请设置密码").then()
+      return
     }
-    users.value.push({...tempUser.value});
+
+    // 权限控制：管理员只能创建普通用户
+    if (global.user.isAdmin === 1 && tempUser.value.role !== 0) {
+      showConfirm("修改错误", "管理员只能创建普通用户")
+      return
+    }
     Serverd.register({
       username: tempUser.value.username,
       email: tempUser.value.email,
-      password: tempUser.value.password
+      password: tempUser.value.password,
+      Admin: tempUser.value.role
     }).then(() => {
+      users.value.push({...tempUser.value});
       showAlert("用户添加成功！", 1000, () => {
-        bsModal?.hide();
+        bsModal?.hide()
       });
     }).catch((error) => {
-      console.error("添加用户失败:", error);
-      alert("添加用户失败，请稍后再试。");
+      console.error("添加用户失败:", error)
+      alert("添加用户失败，请稍后再试。")
     });
   }
 }
-
 </script>
+

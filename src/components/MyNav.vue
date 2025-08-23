@@ -2,7 +2,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container">
       <router-link class="navbar-brand" to="/">
-        <img src="../assets/img/logo.png" style="width: 35px"/>
+        <img src="../assets/img/logo.png" style="width: 35px" alt=""/>
       </router-link>
 
       <button

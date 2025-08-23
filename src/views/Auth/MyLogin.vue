@@ -32,6 +32,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import router from '@/router'
+import {sm2} from 'sm-crypto';
 import {useGlobalStore} from "@/config/global.ts";
 import {Serverd} from "@/tools/Server.ts";
 
@@ -39,6 +40,14 @@ const email = ref('')
 const password = ref('')
 let errorMessage = ref('')
 const global = useGlobalStore();
+
+const key = ref<{
+  key_id: string,
+  public_key: string,
+}>({
+  key_id: '',
+  public_key: '',
+})
 
 
 const getIPByAPI = () => {
@@ -89,52 +98,62 @@ getIPByAPI().then(res => {
 
 
 function handleLogin() {
-  Serverd.login(email.value, password.value, typeof ip === "string" ? ip : '')
-    .then((response) => {
-      if (response.status === 200) {
-        // 登录成功，设置用户信息
-        if (response.data.status !== 200) {
-          errorMessage.value = response.data.message
-          setTimeout(() => {
-            errorMessage.value = ''
-          }, 3000)
-          console.log('登录失败，请检查邮箱和密码。')
-          return
-        }
-        let userData = {
-          username: response.data.data.username || '',
-          email: response.data.data.email || '',
-          token: response.data.data.token || '',
-          avatar: response.data.data.avatar || '',
-          isAdmin: response.data.data.is_admin || 0,
-          is_login: true,
-        }
-        sessionStorage.setItem('user', JSON.stringify(userData))
-        let data: {
-          username: string
-          email: string
-          token: string
-          avatar: string
-          isAdmin: number
-          is_login: boolean
-        } = {
-          is_login: true,
-          isAdmin: response.data.data.is_admin || 0,
-          username: response.data.data.username || '',
-          email: response.data.data.email || '',
-          avatar: response.data.data.avatar || '',
-          token: response.data.data.token || '',
-        }
-        global.setUser(data)
-        router.push('/')
-      } else {
-        console.log('登录失败，请检查邮箱和密码。')
-      }
-    })
-    .catch((error) => {
-      console.error('登录错误:', error)
-      console.log('登录失败，请稍后再试。')
-    })
+  Serverd.getKey().then((res) => {
+    if (res.status === 200) {
+      key.value.public_key = res.data.public_key
+      key.value.key_id = res.data.key_id
+      const encryptData = sm2.doEncrypt(password.value, key.value.public_key, 0);
+      Serverd.login(email.value, encryptData, typeof ip === "string" ? ip : '', key.value.key_id)
+        .then((response) => {
+          if (response.status === 200) {
+            // 登录成功，设置用户信息
+            if (response.data.status !== 200) {
+              errorMessage.value = response.data.message
+              setTimeout(() => {
+                errorMessage.value = ''
+              }, 3000)
+              console.log('登录失败，请检查邮箱和密码。')
+              return
+            }
+            let userData = {
+              username: response.data.data.username || '',
+              email: response.data.data.email || '',
+              token: response.data.data.token || '',
+              avatar: response.data.data.avatar || '',
+              isAdmin: response.data.data.is_admin || 0,
+              is_login: true,
+            }
+            sessionStorage.setItem('user', JSON.stringify(userData))
+            let data: {
+              username: string
+              email: string
+              token: string
+              avatar: string
+              isAdmin: number
+              is_login: boolean
+            } = {
+              is_login: true,
+              isAdmin: response.data.data.is_admin || 0,
+              username: response.data.data.username || '',
+              email: response.data.data.email || '',
+              avatar: response.data.data.avatar || '',
+              token: response.data.data.token || '',
+            }
+            global.setUser(data)
+            router.push('/')
+          } else {
+            console.log('登录失败，请检查邮箱和密码。')
+          }
+        })
+        .catch((error) => {
+          console.error('登录错误:', error)
+          console.log('登录失败，请稍后再试。')
+        })
+    }
+  }).catch((err) => {
+    console.error("获取公钥失败:", err);
+  })
+
 
 }
 </script>

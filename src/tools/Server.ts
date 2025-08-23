@@ -7,11 +7,16 @@ class Server {
     axios.defaults.baseURL = url;
   }
 
-  public login = (email: string, password: string, ip: string) => {
+  public getKey = () => {
+    return axios.post('generate_keys');
+  }
+
+  public login = (email: string, password: string, ip: string, key_id: string) => {
     return axios.post('/login', {
       email,
       password,
-      ip_address: ip
+      ip_address: ip,
+      key_id
     });
   }
 
@@ -27,6 +32,7 @@ class Server {
     username: string
     email: string,
     password: string
+    Admin?: number
   }) => {
     return axios.post('/register', data);
   }
