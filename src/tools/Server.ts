@@ -33,6 +33,7 @@ class Server {
     email: string,
     password: string
     Admin?: number
+    max_logins?: number
   }) => {
     return axios.post('/register', data);
   }
@@ -51,6 +52,7 @@ class Server {
     email: string
     password?: string
     Admin?: number
+    max_logins?: number
   }) => {
     const globalStore = useGlobalStore();
     return axios.post('/updateUser', data, {
@@ -59,7 +61,39 @@ class Server {
       }
     });
   }
+  public deleteUser = (id: number) => {
+    const globalStore = useGlobalStore();
+    return axios.post('/delete_user', {id}, {
+      headers: {
+        'Authorization': `${globalStore.user.token}`
+      }
+    });
+  }
 
+  public get_profile = () => {
+    const globalStore = useGlobalStore();
+    return axios.post('/get_profile', {}, {
+      headers: {
+        'Authorization': `${globalStore.user.token}`
+      }
+    });
+  }
+  public update_profile = (data: {
+    name: string
+    sex: '男' | '女' | '保密'
+    birth_date?: string | null
+    phone?: string
+    address?: string
+    city?: string
+    province?: string
+    postal_code?: string
+  }) => {
+    return axios.post("/update_profile", data, {
+      headers: {
+        'Authorization': `${useGlobalStore().user.token}`
+      }
+    })
+  }
 }
 
 const Serverd = new Server()

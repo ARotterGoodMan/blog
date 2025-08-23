@@ -28,6 +28,7 @@
               <th>ID</th>
               <th>用户名</th>
               <th>邮箱</th>
+              <th>最大登录数量</th>
               <th>角色</th>
               <th>操作</th>
             </tr>
@@ -37,6 +38,7 @@
               <td>{{ user.id }}</td>
               <td>{{ user.username }}</td>
               <td>{{ user.email }}</td>
+              <td>{{ user.max_logins }}</td>
               <td>
                  <span class="badge"
                        :class="user.role === 2 ? 'bg-primary' : user.role === 1 ? 'bg-danger' : 'bg-secondary'">
@@ -53,7 +55,7 @@
               </td>
             </tr>
             <tr v-if="paginatedUsers.length === 0">
-              <td colspan="5" class="text-center text-muted">没有找到匹配的用户</td>
+              <td colspan="6" class="text-center text-muted">没有找到匹配的用户</td>
             </tr>
           </tbody>
         </table>
@@ -71,6 +73,7 @@
               </span>
             </h5>
             <p class="mb-1"><i class="fas fa-envelope me-2"></i>{{ user.email }}</p>
+            <p class="mb-3"><i class="fas fa-id-badge me-2"></i>ID: {{ user.max_logins }}</p>
             <div class="d-flex justify-content-end gap-2">
               <button class="btn btn-sm btn-outline-primary" @click="openEditModal(user)">
                 <i class="fas fa-edit"></i> 编辑
@@ -139,6 +142,11 @@
                          placeholder="编辑用户可留空保持原密码"/>
                 </div>
                 <div class="mb-3">
+                  <label class="form-label">最大登录数</label>
+                  <input v-model.number="tempUser.max_logins" type="number" class="form-control"
+                         min="1" required/>
+                </div>
+                <div class="mb-3">
                   <label class="form-label">角色</label>
                   <select v-model.number="tempUser.role" class="form-select" required>
                     <option :value="1">管理员</option>
@@ -196,11 +204,12 @@ import {useGlobalStore} from "@/config/global.ts"
 const global = useGlobalStore();
 
 interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: 0 | 1 | 2; // 0: 普通用户, 1: 管理员, 2: 超级管理员
-  password?: string;
+  id: number
+  username: string
+  email: string
+  role: 0 | 1 | 2     // 0: 普通用户, 1: 管理员, 2: 超级管理员
+  password?: string
+  max_logins: number
 }
 
 const users = ref<User[]>([])
@@ -210,7 +219,7 @@ const itemsPerPage = ref(5)
 const currentPage = ref(1)
 const ModalAlert = ref("")
 const editingUser = ref<User | null>(null)
-const tempUser = ref<User>({id: 0, username: "", email: "", role: 0, password: ""})
+const tempUser = ref<User>({id: 0, username: "", email: "", role: 0, password: "", max_logins: 3})
 const editModalRef = ref<HTMLDivElement | null>(null)
 let bsModal: Modal | null = null
 const confirmModalRef = ref<HTMLDivElement | null>(null)
@@ -226,7 +235,8 @@ Serverd.getAllUsers().then((res) => {
     username: user.username,
     email: user.email,
     role: user.is_admin,
-    password: user.password
+    password: user.password,
+    max_logins: user.max_logins
   }));
 })
 
@@ -301,7 +311,7 @@ async function deleteUser(user: any) {
     await showConfirm("操作失败", "不能删除当前登录用户")
     return
   }
-  if (1 === 1 && user.role >= 1) { // 你的权限判断逻辑
+  if (global.user.isAdmin === 1 && user.role >= 1) { // 你的权限判断逻辑
     await showConfirm("操作失败", "管理员不能删除管理员或超级管理员")
     return
   }
@@ -309,13 +319,28 @@ async function deleteUser(user: any) {
   const ok = await showConfirm("操作确认", `确定要删除用户 ${user.username} 吗？`)
   if (!ok) return
 
+
   // 删除逻辑
+  Serverd.deleteUser(user.id).then(() => {
+    users.value = users.value.filter(u => u.email !== user.email)
+    showAlert("用户删除成功！", 2000)
+  }).catch((error) => {
+    console.error("删除用户失败:", error)
+    alert("删除用户失败，请稍后再试。")
+  });
 }
 
 // 打开编辑/新增模态框
 function openEditModal(user: User | null) {
   editingUser.value = user
-  tempUser.value = user ? {...user} : {id: 0, username: "", email: "", role: 0, password: ""}
+  tempUser.value = user ? {...user} : {
+    id: 0,
+    username: "",
+    email: "",
+    role: 0,
+    password: "",
+    max_logins: 3
+  }
 
   // 限制管理员不能编辑更高级角色
   if (global.user.isAdmin === 1 && user && user.role >= 1) {
@@ -357,7 +382,8 @@ function saveUser() {
         username: tempUser.value.username,
         email: tempUser.value.email,
         Admin: tempUser.value.role,
-        password: tempUser.value.password || users.value[index].password
+        password: tempUser.value.password || users.value[index].password,
+        max_logins: tempUser.value.max_logins
       }).then(() => {
         showAlert("用户修改成功！", 2000, () => {
           bsModal?.hide()
@@ -386,7 +412,8 @@ function saveUser() {
       username: tempUser.value.username,
       email: tempUser.value.email,
       password: tempUser.value.password,
-      Admin: tempUser.value.role
+      Admin: tempUser.value.role,
+      max_logins: tempUser.value.max_logins
     }).then(() => {
       users.value.push({...tempUser.value});
       showAlert("用户添加成功！", 1000, () => {
