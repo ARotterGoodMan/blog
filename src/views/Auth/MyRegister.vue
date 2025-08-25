@@ -19,7 +19,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label">确认密码</label>
-            <input v-model="ConfirmPassword" type="text" class="form-control" required/>
+            <input v-model="ConfirmPassword" type="password" class="form-control" required/>
           </div>
           <div v-if="Message" :class="'alert '+ (massage_color ? 'alert-success' : 'alert-danger')">
             <i class="fas" :class="massage_color ? 'fa-check' : 'fa-exclamation-triangle'"></i>
@@ -39,6 +39,7 @@
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {Serverd} from "@/tools/Server.ts";
+import {sm2} from 'sm-crypto';
 
 const username = ref('')
 const email = ref('')
@@ -46,12 +47,18 @@ const password = ref('')
 const ConfirmPassword = ref('')
 const Message = ref('')
 let massage_color = true
-
-
 const router = useRouter()
 
+const key = ref<{
+  key_id: string,
+  public_key: string,
+}>({
+  key_id: '',
+  public_key: '',
+})
+
 function handleRegister() {
-  if (!username.value || !email.value || !ConfirmPassword || !password.value) {
+  if (!username.value || !email.value || !password.value || !ConfirmPassword.value) {
     Message.value = '请填写所有字段'
     massage_color = false
     return
@@ -61,25 +68,33 @@ function handleRegister() {
     massage_color = false
     return
   }
-  // 这里可以添加更多的验证逻辑，比如邮箱格式、密码强度等
-  // 发送注册请求到服务器
-  Serverd.register({
-    username: username.value,
-    email: email.value,
-    password: password.value
-  }).then(response => {
-    if (response.data.status == 201) {
-      Message.value = '注册成功！请登录。'
-      // 可以重定向到登录页面
-      setTimeout(() => router.push('/login'), 3000)
-    } else {
+  Serverd.getKey().then(res => {
+    if (res.status != 200) {
+      Message.value = '获取公钥失败：' + res.data.message
       massage_color = false
-      Message.value = '注册失败：' + response.data.message
-
+      return
     }
-  }).catch(error => {
-    console.error('注册请求失败:', error)
-  })
 
+    key.value.key_id = res.data.key_id
+    key.value.public_key = res.data.public_key
+    password.value = sm2.doEncrypt(password.value, key.value.public_key, 0);
+    Serverd.register({
+      username: username.value,
+      email: email.value,
+      password: password.value,
+      key_id: key.value.key_id
+    }).then((res) => {
+      if (res.data.status == 201) {
+        Message.value = '注册成功！请登录。'
+        // 可以重定向到登录页面
+        setTimeout(() => router.push('/login'), 3000)
+      } else {
+        massage_color = false
+        Message.value = '注册失败：' + res.data.message
+      }
+    }).catch(error => {
+      console.error('注册请求失败:', error)
+    })
+  })
 }
 </script>

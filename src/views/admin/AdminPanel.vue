@@ -196,10 +196,12 @@
 
 <script setup lang="ts">
 
-import {ref, computed, watch, onMounted} from "vue"
+import {computed, onMounted, ref, watch} from "vue"
 import {Modal} from "bootstrap"
+import {sm2} from 'sm-crypto';
 import {Serverd} from "@/tools/Server.ts"
 import {useGlobalStore} from "@/config/global.ts"
+
 
 const global = useGlobalStore();
 
@@ -227,6 +229,14 @@ let confirmModal: Modal | null = null
 const confirmMessage = ref("")
 const confirmTitle = ref("")
 let confirmResolve: ((val: boolean) => void) | null = null
+
+const key = ref<{
+  key_id: string,
+  public_key: string,
+}>({
+  key_id: '',
+  public_key: '',
+})
 
 // 获取后端用户列表
 Serverd.getAllUsers().then((res) => {
@@ -360,6 +370,49 @@ function showAlert(msg: string, duration = 3000, callback?: () => void) {
   }, duration)
 }
 
+
+const updateUserprofile = (index: any) => {
+  Serverd.updateUser({
+    id: users.value[index].id,
+    username: tempUser.value.username,
+    email: tempUser.value.email,
+    Admin: tempUser.value.role,
+    password: tempUser.value.password || users.value[index].password,
+    max_logins: tempUser.value.max_logins
+  }).then(() => {
+    showAlert("用户修改成功！", 2000, () => {
+      bsModal?.hide()
+    });
+    users.value[index] = {
+      ...tempUser.value,
+      password: tempUser.value.password || users.value[index].password
+    }
+  }).catch((error) => {
+    console.error("修改用户失败:", error)
+    alert("修改用户失败，请稍后再试。")
+  });
+}
+
+const register = () => {
+  tempUser.value.password = sm2.doEncrypt(tempUser.value.password ? tempUser.value.password : "123456", key.value.public_key, 0);
+  Serverd.register({
+    username: tempUser.value.username,
+    email: tempUser.value.email,
+    password: tempUser.value.password || '',
+    Admin: tempUser.value.role,
+    max_logins: tempUser.value.max_logins,
+    key_id: key.value.key_id
+  }).then(() => {
+    users.value.push({...tempUser.value});
+    showAlert("用户添加成功！", 1000, () => {
+      bsModal?.hide()
+    });
+  }).catch((error) => {
+    console.error("添加用户失败:", error)
+    alert("添加用户失败，请稍后再试。")
+  });
+}
+
 // 保存用户
 function saveUser() {
   if (editingUser.value) {
@@ -377,25 +430,22 @@ function saveUser() {
 
     const index = users.value.findIndex(u => u.email === editingUser.value?.email);
     if (index !== -1) {
-      Serverd.updateUser({
-        id: users.value[index].id,
-        username: tempUser.value.username,
-        email: tempUser.value.email,
-        Admin: tempUser.value.role,
-        password: tempUser.value.password || users.value[index].password,
-        max_logins: tempUser.value.max_logins
-      }).then(() => {
-        showAlert("用户修改成功！", 2000, () => {
-          bsModal?.hide()
-        });
-        users.value[index] = {
-          ...tempUser.value,
-          password: tempUser.value.password || users.value[index].password
-        }
-      }).catch((error) => {
-        console.error("修改用户失败:", error)
-        alert("修改用户失败，请稍后再试。")
-      });
+      if (tempUser.value.password || users.value[index].password) {
+        Serverd.getKey().then(res => {
+          if (res.status === 200) {
+            key.value.public_key = res.data.public_key
+            key.value.key_id = res.data.key_id
+            if (tempUser.value.password) {
+              tempUser.value.password = sm2.doEncrypt(tempUser.value.password, key.value.public_key, 0);
+            } else {
+              tempUser.value.password = users.value[index].password;
+            }
+            updateUserprofile(index);
+          }
+        })
+      } else {
+        updateUserprofile(index);
+      }
     }
   } else {
     if (!tempUser.value.password) {
@@ -408,21 +458,14 @@ function saveUser() {
       showConfirm("修改错误", "管理员只能创建普通用户")
       return
     }
-    Serverd.register({
-      username: tempUser.value.username,
-      email: tempUser.value.email,
-      password: tempUser.value.password,
-      Admin: tempUser.value.role,
-      max_logins: tempUser.value.max_logins
-    }).then(() => {
-      users.value.push({...tempUser.value});
-      showAlert("用户添加成功！", 1000, () => {
-        bsModal?.hide()
-      });
-    }).catch((error) => {
-      console.error("添加用户失败:", error)
-      alert("添加用户失败，请稍后再试。")
-    });
+    Serverd.getKey().then(res => {
+      if (res.status === 200) {
+        key.value.public_key = res.data.public_key
+        key.value.key_id = res.data.key_id
+        register()
+      }
+    })
+
   }
 }
 </script>

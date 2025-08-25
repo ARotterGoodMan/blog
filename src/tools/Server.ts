@@ -34,6 +34,7 @@ class Server {
     password: string
     Admin?: number
     max_logins?: number
+    key_id: string
   }) => {
     return axios.post('/register', data);
   }
@@ -53,6 +54,7 @@ class Server {
     password?: string
     Admin?: number
     max_logins?: number
+    key_id?: string
   }) => {
     const globalStore = useGlobalStore();
     return axios.post('/updateUser', data, {
