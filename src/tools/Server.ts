@@ -96,6 +96,30 @@ class Server {
       }
     })
   }
+
+  public get_notes() {
+    return axios.get('/notes', {
+      headers: {
+        'Authorization': `${useGlobalStore().user.token}`
+      }
+    });
+  }
+
+  public save_note(data: { id?: string, title: string, content: string }) {
+    return axios.post('/notes', data, {
+      headers: {
+        'Authorization': `${useGlobalStore().user.token}`
+      }
+    });
+  }
+
+  public delete_note(id: string) {
+    return axios.post('/delete_note', {id}, {
+      headers: {
+        'Authorization': `${useGlobalStore().user.token}`
+      }
+    });
+  }
 }
 
 const Serverd = new Server()

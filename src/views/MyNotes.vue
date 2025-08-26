@@ -2,7 +2,6 @@
   <main class="notes-app">
     <div class="container-fluid p-2 app-container">
       <div class="row h-100">
-        <!-- 左侧笔记列表 -->
         <aside
           class="col-md-2 col-lg-2 border-end p-2 d-none d-md-flex flex-column notes-sidebar"
           :class="{ 'd-flex': showSidebar }"
@@ -42,7 +41,6 @@
             </div>
           </div>
 
-          <!-- 移动端侧边栏切换按钮 -->
           <button
             v-if="showSidebar"
             class="btn btn-sm btn-secondary mt-auto d-md-none"
@@ -52,7 +50,6 @@
           </button>
         </aside>
 
-        <!-- 移动端顶部栏 -->
         <div class="d-flex d-md-none mobile-header mb-2">
           <button class="btn btn-sm btn-outline-secondary me-2" @click="showSidebar = true">
             <i class="fas fa-bars"></i>
@@ -72,7 +69,6 @@
           </button>
         </div>
 
-        <!-- 右侧编辑区 -->
         <section class="col-12 col-md-10 col-lg-10 d-flex flex-column editor-section">
           <div
             class="editor-header p-2 border-bottom d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2"
@@ -81,10 +77,10 @@
               v-model="currentNote.title"
               class="form-control title-input"
               placeholder="请输入标题..."
-              @keyup.enter="saveNotes"
+              @keyup.enter="saveNotesHandler"
             />
             <div class="d-flex gap-2 controls">
-              <button class="btn btn-success" @click="saveNotes" :disabled="isSaving">
+              <button class="btn btn-success" @click="saveNotesHandler" :disabled="isSaving">
                 <i class="fas fa-save"></i> 保存
               </button>
               <button class="btn btn-info d-md-none" @click="showSidebar = true">
@@ -99,7 +95,7 @@
               :preview="false"
               class="md-editor"
               :language="'zh-CN'"
-              @onSave="saveNotes"
+              @onSave="saveNotesHandler"
               github-style="none"
             />
           </div>
@@ -111,7 +107,6 @@
       </div>
     </div>
 
-    <!-- 删除确认模态框 -->
     <div v-if="noteToDelete" class="modal fade show d-block" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -128,7 +123,7 @@
             <button
               type="button"
               class="btn btn-danger"
-              @click="deleteNote(noteToDelete.id)"
+              @click="deleteNoteHandler(noteToDelete.id)"
               :disabled="isDeleting"
             >
               {{ isDeleting ? '删除中...' : '确认删除' }}
@@ -142,203 +137,138 @@
 </template>
 
 <script lang="ts" setup>
-import {ref, reactive, onMounted, watch, computed, onUnmounted} from 'vue'
-import {MdEditor} from 'md-editor-v3'
-import 'md-editor-v3/lib/style.css'
+import {ref, reactive, onMounted, onUnmounted, computed} from "vue";
+import {MdEditor} from "md-editor-v3";
+import "md-editor-v3/lib/style.css";
+import {
+  type Note,
+  loadNotes,
+  saveNotes as saveNotesService,
+  deleteNote as deleteNoteService
+} from "@/tools/storageService.ts";
 
-interface Note {
-  id: number
-  title: string
-  content: string
-  createdAt: string
-  updatedAt: string
-}
+const notes = ref<Note[]>([]);
+const currentNote = reactive<Note>(createEmptyNote());
+const currentNoteId = ref<string | null>(null);
+const lastSaved = ref<string>("");
+const isSaving = ref(false);
+const isDeleting = ref(false);
+const noteToDelete = ref<Note | null>(null);
+const showSidebar = ref(false);
 
-// 响应式数据
-const notes = ref<Note[]>([])
-const currentNote = reactive<Note>(createEmptyNote())
-const currentNoteId = ref<number | null>(null)
-const lastSaved = ref<string>('')
-const isSaving = ref<boolean>(false)
-const isDeleting = ref<boolean>(false)
-const noteToDelete = ref<Note | null>(null)
-const showSidebar = ref<boolean>(false)
+const hasNotes = computed(() => notes.value.length > 0);
 
-// 计算属性
-const hasNotes = computed(() => notes.value.length > 0)
-
-// 创建空笔记模板
 function createEmptyNote(): Note {
-  const timestamp = new Date().toISOString()
+  const timestamp = new Date().toISOString();
   return {
-    id: 0,
-    title: '',
-    content: '',
+    id: crypto.randomUUID(),
+    title: "",
+    content: "",
     createdAt: timestamp,
-    updatedAt: timestamp,
-  }
+    updatedAt: timestamp
+  };
 }
 
-// 初始化加载
-onMounted(() => {
-  loadNotes()
-  // 添加键盘快捷键
-  window.addEventListener('keydown', handleKeydown)
-})
+onMounted(async () => {
+  notes.value = await loadNotes();
+  if (notes.value.length > 0) selectNote(notes.value[0]);
+  window.addEventListener("keydown", handleKeydown);
+});
 
-// 清理事件监听器
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
-})
+  window.removeEventListener("keydown", handleKeydown);
+});
 
-// 键盘快捷键处理
 function handleKeydown(e: KeyboardEvent) {
-  // Ctrl+S 或 Cmd+S 保存
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-    e.preventDefault()
-    saveNotes()
+  if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+    e.preventDefault();
+    saveNotesHandler();
   }
-
-  // Ctrl+N 或 Cmd+N 新建笔记
-  if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-    e.preventDefault()
-    createNote()
+  if ((e.ctrlKey || e.metaKey) && e.key === "n") {
+    e.preventDefault();
+    createNote();
   }
 }
 
-// 从本地存储加载笔记
-function loadNotes() {
-  try {
-    const saved = localStorage.getItem('notes')
-    if (saved) {
-      notes.value = JSON.parse(saved)
-      // 迁移旧数据（兼容性处理）
-      if (notes.value.length > 0 && !notes.value[0].createdAt) {
-        notes.value = notes.value.map((note) => ({
-          ...note,
-          createdAt: note.createdAt || new Date().toISOString(),
-          updatedAt: note.updatedAt || new Date().toISOString(),
-        }))
-      }
-
-      if (notes.value.length > 0) {
-        selectNote(notes.value[0])
-      }
-    }
-  } catch (error) {
-    console.error('加载笔记失败:', error)
-    notes.value = []
-  }
+function isNoteActive(noteId: string): boolean {
+  return currentNote && currentNote.id === noteId;
 }
 
-// 自动保存到 localStorage（使用防抖）
-let saveTimeout: number | null = null
-watch(
-  notes,
-  (val) => {
-    if (saveTimeout) {
-      clearTimeout(saveTimeout)
-    }
-    saveTimeout = setTimeout(() => {
-      localStorage.setItem('notes', JSON.stringify(val))
-      lastSaved.value = new Date().toLocaleString()
-    }, 1000) as unknown as number
-  },
-  {deep: true},
-)
-
-// 检查笔记是否当前活动笔记
-function isNoteActive(noteId: number): boolean {
-  return currentNote && currentNote.id === noteId
-}
-
-// 新建笔记
 function createNote(): void {
-  const note: Note = {
-    id: Date.now(),
-    title: '新建笔记',
-    content: '',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  }
-  notes.value.unshift(note)
-  selectNote(note)
-  currentNoteId.value = note.id
-  showSidebar.value = false
+  const note: Note = createEmptyNote();
+  note.title = "新建笔记";
+  notes.value.unshift(note);
+  selectNote(note);
+  currentNoteId.value = note.id;
+  showSidebar.value = false;
 }
 
-// 选择笔记
 function selectNote(note: Note): void {
-  Object.assign(currentNote, note)
-  currentNoteId.value = note.id
-  showSidebar.value = false
+  Object.assign(currentNote, note);
+  currentNoteId.value = note.id;
+  showSidebar.value = false;
 }
 
-// 手机选择笔记
 function onMobileSelect(): void {
-  const note = notes.value.find((n) => n.id === currentNoteId.value)
-  if (note) {
-    selectNote(note)
-  }
+  const note = notes.value.find(n => n.id === currentNoteId.value);
+  if (note) selectNote(note);
 }
 
-// 确认删除笔记
 function confirmDeleteNote(note: Note): void {
-  noteToDelete.value = note
+  noteToDelete.value = note;
 }
 
-// 删除笔记
-async function deleteNote(id: number): Promise<void> {
-  if (isDeleting.value) return
-
-  isDeleting.value = true
+async function deleteNoteHandler(id: string): Promise<void> {
+  if (isDeleting.value) return;
+  isDeleting.value = true;
   try {
-    // 模拟异步操作（实际应用中可能是API调用）
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    notes.value = notes.value.filter((n) => n.id !== id)
+    notes.value = await deleteNoteService(notes.value, id);
     if (currentNote.id === id) {
-      if (notes.value.length > 0) {
-        selectNote(notes.value[0])
-      } else {
-        Object.assign(currentNote, createEmptyNote())
-        currentNoteId.value = null
-      }
+      if (notes.value.length > 0) selectNote(notes.value[0]);
+      else Object.assign(currentNote, createEmptyNote());
+      currentNoteId.value = notes.value.length > 0 ? notes.value[0].id : null;
     }
-    noteToDelete.value = null
+    noteToDelete.value = null;
   } catch (error) {
-    console.error('删除笔记失败:', error)
+    console.error("删除笔记失败:", error);
   } finally {
-    isDeleting.value = false
+    isDeleting.value = false;
   }
 }
 
-// 保存笔记内容
-async function saveNotes(): Promise<void> {
-  if (isSaving.value) return
+// ------------------ 批量保存笔记 ------------------
+let saveTimeout: number | null = null;
 
-  isSaving.value = true
+function saveNotesHandler(): void {
+  if (isSaving.value) return;
+  isSaving.value = true;
+
   try {
-    // 模拟异步操作
-    await new Promise((resolve) => setTimeout(resolve, 300))
-
-    const index = notes.value.findIndex((n) => n.id === currentNote.id)
-    if (index !== -1) {
-      currentNote.updatedAt = new Date().toISOString()
-      notes.value[index] = {...currentNote}
+    // 确保当前笔记更新到列表
+    if (!currentNote.title.trim()) {
+      currentNote.title = currentNote.content.split("\n")[0]?.slice(0, 20) || "未命名笔记";
     }
+    currentNote.updatedAt = new Date().toISOString();
+    const index = notes.value.findIndex(n => n.id === currentNote.id);
+    if (index !== -1) notes.value[index] = {...currentNote};
+    else notes.value.unshift({...currentNote});
 
-    // 显示保存反馈
-    lastSaved.value = new Date().toLocaleString()
-  } catch (error) {
-    console.error('保存笔记失败:', error)
-  } finally {
-    isSaving.value = false
+    // 防抖批量保存
+    if (saveTimeout) clearTimeout(saveTimeout);
+    saveTimeout = window.setTimeout(async () => {
+      await saveNotesService(notes.value);
+      lastSaved.value = new Date().toLocaleString();
+      isSaving.value = false;
+    }, 500);
+  } catch (err) {
+    console.error("批量保存失败:", err);
+    isSaving.value = false;
   }
 }
 </script>
 
 <style scoped>
+/* 样式同前面组件一致，可复用 */
 .notes-app {
   height: calc(100vh - 110px);
   width: 95vw;
