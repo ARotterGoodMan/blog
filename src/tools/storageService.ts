@@ -10,7 +10,6 @@ export interface Note {
 }
 
 
-// ============ LocalStorage 方法 ============
 function loadNotesFromLocal(): Note[] {
   const saved = localStorage.getItem("notes");
   return saved ? JSON.parse(saved) : [];
@@ -20,12 +19,15 @@ function saveNotesToLocal(notes: Note[]): void {
   localStorage.setItem("notes", JSON.stringify(notes));
 }
 
-// ============ API + 本地 fallback 方法 ============
 export async function loadNotes(): Promise<Note[]> {
   let global = useGlobalStore();
   if (global.user.token) {
     return Serverd.get_notes().then(
-      (res) => res.data as Note[],
+      (res) => {
+        const data = res.data.data;
+        console.log(res.data.data)
+        return Array.isArray(data) ? data : [];
+      },
       (err) => {
         console.error(
           "Failed to load notes from API, falling back to local storage.",
@@ -59,10 +61,7 @@ export async function saveNotes(notes: Note[]): Promise<void> {
   }
 }
 
-export async function deleteNote(
-  notes: Note[],
-  id: string
-): Promise<Note[]> {
+export async function deleteNote(notes: Note[], id: string): Promise<Note[]> {
   const newNotes = notes.filter((n) => n.id !== id);
   let global = useGlobalStore();
   if (global.user.token) {

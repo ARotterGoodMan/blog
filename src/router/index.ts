@@ -8,9 +8,10 @@ import Admin from '@/views/admin/AdminPanel.vue'
 import Register from '@/views/Auth/MyRegister.vue'
 import Profile from '@/views/Profile/MyProfile.vue'
 import ForgotPassword from '@/views/Auth/ForgotPassword.vue'
+import ResetPassword from '@/views/Auth/ResetPassword.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes: [
     {
       name: '首页',
@@ -68,7 +69,10 @@ const router = createRouter({
       path: '/forgot-password',
       component: ForgotPassword,
     },
-
+    {
+      path: '/reset-password',
+      component: ResetPassword,
+    },
     {
       path: '/profile',
       component: Profile,

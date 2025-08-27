@@ -158,10 +158,19 @@ const showSidebar = ref(false);
 
 const hasNotes = computed(() => notes.value.length > 0);
 
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+
 function createEmptyNote(): Note {
   const timestamp = new Date().toISOString();
   return {
-    id: crypto.randomUUID(),
+    id: uuid(),
     title: "",
     content: "",
     createdAt: timestamp,
@@ -236,7 +245,7 @@ async function deleteNoteHandler(id: string): Promise<void> {
   }
 }
 
-// ------------------ 批量保存笔记 ------------------
+
 let saveTimeout: number | null = null;
 
 function saveNotesHandler(): void {

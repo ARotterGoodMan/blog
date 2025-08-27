@@ -3,7 +3,7 @@ import {useGlobalStore} from "@/config/global.ts";
 
 class Server {
   constructor() {
-    const url = 'http://localhost:5000/api';
+    const url = 'http://api.svipsvip.中国/api';
     axios.defaults.baseURL = url;
   }
 
@@ -96,6 +96,13 @@ class Server {
       }
     })
   }
+  public forgot_password = (email: string) => {
+    return axios.post('/forgot_password', {email});
+  }
+
+  public reset_password = (key_id: string, token: string, new_password: string) => {
+    return axios.post('/reset_password', {key_id, token, new_password});
+  }
 
   public get_notes() {
     return axios.get('/notes', {
@@ -114,7 +121,7 @@ class Server {
   }
 
   public delete_note(id: string) {
-    return axios.post('/delete_note', {id}, {
+    return axios.delete(`/delete_note/${id}`, {
       headers: {
         'Authorization': `${useGlobalStore().user.token}`
       }

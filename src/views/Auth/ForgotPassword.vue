@@ -10,6 +10,7 @@
         </div>
         <button type="submit" class="btn btn-warning w-100">重置密码</button>
       </form>
+      <div v-if="message" class="alert alert-info mt-3">{{ message }}</div>
       <div class="text-center mt-3">
         <router-link to="/login">返回登录</router-link>
       </div>
@@ -19,10 +20,24 @@
 
 <script lang="ts" setup>
 import {ref} from 'vue'
+import {Serverd} from "@/tools/Server.ts";
 
 const email = ref('')
+const message = ref('')
+const loading = ref(false)
+
 
 function handleForgotPassword() {
-  alert(`重置密码邮件已发送到: ${email.value}`)
+  message.value = ''
+  loading.value = true
+
+  Serverd.forgot_password(email.value).then(res => {
+    message.value = '✅ 重置链接已发送，请查收'
+  }).catch(err => {
+    message.value = err.response?.data?.error || '❌ 请求失败'
+  }).finally(() => {
+    loading.value = false
+  })
 }
+
 </script>
