@@ -371,14 +371,15 @@ function showAlert(msg: string, duration = 3000, callback?: () => void) {
 }
 
 
-const updateUserprofile = (index: any) => {
+const updateUserprofile = (index: any, key_id?: string) => {
   Serverd.updateUser({
     id: users.value[index].id,
     username: tempUser.value.username,
     email: tempUser.value.email,
     Admin: tempUser.value.role,
     password: tempUser.value.password || users.value[index].password,
-    max_logins: tempUser.value.max_logins
+    max_logins: tempUser.value.max_logins,
+    key_id
   }).then(() => {
     showAlert("用户修改成功！", 2000, () => {
       bsModal?.hide()
@@ -440,7 +441,7 @@ function saveUser() {
             } else {
               tempUser.value.password = users.value[index].password;
             }
-            updateUserprofile(index);
+            updateUserprofile(index, key.value.key_id);
           }
         })
       } else {

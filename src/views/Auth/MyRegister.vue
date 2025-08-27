@@ -1,7 +1,7 @@
 <template>
   <main>
     <div class="container d-flex justify-content-center align-items-center"
-         style="height: calc(100vh - 120px);">
+         style="height: calc(100vh - 122px);">
       <div class="card p-4 shadow" style="width: 360px">
         <h3 class="text-center mb-3"><i class="fas fa-user-plus"></i> 注册</h3>
         <form @submit.prevent="handleRegister">
