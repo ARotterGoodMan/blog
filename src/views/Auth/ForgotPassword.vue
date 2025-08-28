@@ -20,7 +20,7 @@
 
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {Serverd} from "@/tools/Server.ts";
+import {Servers} from "@/tools/Server.ts";
 
 const email = ref('')
 const message = ref('')
@@ -31,7 +31,7 @@ function handleForgotPassword() {
   message.value = ''
   loading.value = true
 
-  Serverd.forgot_password(email.value).then(res => {
+  Servers.forgot_password(email.value).then(res => {
     message.value = '✅ 重置链接已发送，请查收'
   }).catch(err => {
     message.value = err.response?.data?.error || '❌ 请求失败'

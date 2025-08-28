@@ -156,7 +156,7 @@
 <script lang="ts" setup>
 import {ref, reactive, onMounted, watch} from 'vue'
 import router from '@/router'
-import {Serverd} from "@/tools/Server.ts"
+import {Servers} from "@/tools/Server.ts"
 import {useGlobalStore} from "@/config/global"
 
 const global = useGlobalStore()
@@ -259,7 +259,7 @@ const availableCities = ref<string[]>([])
 // 获取用户资料
 const fetchProfile = async () => {
   try {
-    const res = await Serverd.get_profile()
+    const res = await Servers.get_profile()
     if (res.status === 200) {
       // 处理返回的用户资料
       profile.value = res.data.data
@@ -302,7 +302,7 @@ function handleProvinceChange() {
 function toggleLogout() {
   if (confirm('确定要退出登录吗？')) {
     sessionStorage.removeItem('user')
-    Serverd.logout()
+    Servers.logout()
     global.setUser({
       username: '',
       email: '',
@@ -330,7 +330,7 @@ function toggleEditMode() {
 
 async function saveChanges() {
   try {
-    const res = await Serverd.update_profile(editableProfile)
+    const res = await Servers.update_profile(editableProfile)
     if (res.status === 200) {
       // 更新成功，更新全局状态
       Object.assign(profile.value, editableProfile)

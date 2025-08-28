@@ -1,9 +1,10 @@
 import axios from 'axios'
+import {Api_url} from "@/config/config.ts";
 import {useGlobalStore} from "@/config/global.ts";
 
 class Server {
   constructor() {
-    axios.defaults.baseURL = 'http://api.svipsvip.中国/api';
+    axios.defaults.baseURL = Api_url;
   }
 
   public getKey = () => {
@@ -128,7 +129,5 @@ class Server {
   }
 }
 
-const Serverd = new Server()
-// export default {Serverd}
+export const Servers = new Server()
 
-export {Serverd}

@@ -199,20 +199,13 @@
 import {computed, onMounted, ref, watch} from "vue"
 import {Modal} from "bootstrap"
 import {sm2} from 'sm-crypto';
-import {Serverd} from "@/tools/Server.ts"
+import {Servers} from "@/tools/Server.ts"
+import {type KEY, type AdminLookUser as User} from "@/config/config.ts";
 import {useGlobalStore} from "@/config/global.ts"
 
 
 const global = useGlobalStore();
 
-interface User {
-  id: number
-  username: string
-  email: string
-  role: 0 | 1 | 2     // 0: 普通用户, 1: 管理员, 2: 超级管理员
-  password?: string
-  max_logins: number
-}
 
 const users = ref<User[]>([])
 const searchQuery = ref("")
@@ -230,16 +223,13 @@ const confirmMessage = ref("")
 const confirmTitle = ref("")
 let confirmResolve: ((val: boolean) => void) | null = null
 
-const key = ref<{
-  key_id: string,
-  public_key: string,
-}>({
+const key = ref<KEY>({
   key_id: '',
   public_key: '',
 })
 
 // 获取后端用户列表
-Serverd.getAllUsers().then((res) => {
+Servers.getAllUsers().then((res) => {
   users.value = res.data.data.map((user: any) => ({
     id: user.id,
     username: user.username,
@@ -331,7 +321,7 @@ async function deleteUser(user: any) {
 
 
   // 删除逻辑
-  Serverd.deleteUser(user.id).then(() => {
+  Servers.deleteUser(user.id).then(() => {
     users.value = users.value.filter(u => u.email !== user.email)
     showAlert("用户删除成功！", 2000)
   }).catch((error) => {
@@ -372,7 +362,7 @@ function showAlert(msg: string, duration = 3000, callback?: () => void) {
 
 
 const updateUserprofile = (index: any, key_id?: string) => {
-  Serverd.updateUser({
+  Servers.updateUser({
     id: users.value[index].id,
     username: tempUser.value.username,
     email: tempUser.value.email,
@@ -396,7 +386,7 @@ const updateUserprofile = (index: any, key_id?: string) => {
 
 const register = () => {
   tempUser.value.password = sm2.doEncrypt(tempUser.value.password ? tempUser.value.password : "123456", key.value.public_key, 0);
-  Serverd.register({
+  Servers.register({
     username: tempUser.value.username,
     email: tempUser.value.email,
     password: tempUser.value.password || '',
@@ -432,7 +422,7 @@ function saveUser() {
     const index = users.value.findIndex(u => u.email === editingUser.value?.email);
     if (index !== -1) {
       if (tempUser.value.password || users.value[index].password) {
-        Serverd.getKey().then(res => {
+        Servers.getKey().then(res => {
           if (res.status === 200) {
             key.value.public_key = res.data.public_key
             key.value.key_id = res.data.key_id
@@ -459,7 +449,7 @@ function saveUser() {
       showConfirm("修改错误", "管理员只能创建普通用户")
       return
     }
-    Serverd.getKey().then(res => {
+    Servers.getKey().then(res => {
       if (res.status === 200) {
         key.value.public_key = res.data.public_key
         key.value.key_id = res.data.key_id

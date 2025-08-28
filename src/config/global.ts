@@ -1,9 +1,10 @@
 import {defineStore} from "pinia";
+import type {User} from "@/config/config.ts";
 
 
 const useGlobalStore = defineStore("global", {
   state: () => ({
-    user: {
+    user: <User>{
       username: "",
       email: "",
       token: "",
@@ -20,7 +21,7 @@ const useGlobalStore = defineStore("global", {
               email: string
               token: string
               avatar: string
-              isAdmin: number
+              isAdmin: 0 | 1 | 2
               is_login: boolean
             }
     ) {

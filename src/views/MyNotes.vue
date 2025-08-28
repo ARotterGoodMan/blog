@@ -140,12 +140,13 @@
 import {ref, reactive, onMounted, onUnmounted, computed} from "vue";
 import {MdEditor} from "md-editor-v3";
 import "md-editor-v3/lib/style.css";
+import {type Note} from "@/config/config.ts"
 import {
-  type Note,
   loadNotes,
   saveNotes as saveNotesService,
   deleteNote as deleteNoteService
 } from "@/tools/storageService.ts";
+
 
 const notes = ref<Note[]>([]);
 const currentNote = reactive<Note>(createEmptyNote());

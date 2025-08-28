@@ -33,18 +33,16 @@
 import {ref} from 'vue'
 import router from '@/router'
 import {sm2} from 'sm-crypto';
+import {type KEY} from "@/config/config.ts";
 import {useGlobalStore} from "@/config/global.ts";
-import {Serverd} from "@/tools/Server.ts";
+import {Servers} from "@/tools/Server.ts";
 
 const email = ref('')
 const password = ref('')
 let errorMessage = ref('')
 const global = useGlobalStore();
 
-const key = ref<{
-  key_id: string,
-  public_key: string,
-}>({
+const key = ref<KEY>({
   key_id: '',
   public_key: '',
 })
@@ -98,12 +96,12 @@ getIPByAPI().then(res => {
 
 
 function handleLogin() {
-  Serverd.getKey().then((res) => {
+  Servers.getKey().then((res) => {
     if (res.status === 200) {
       key.value.public_key = res.data.public_key
       key.value.key_id = res.data.key_id
       const encryptData = sm2.doEncrypt(password.value, key.value.public_key, 0);
-      Serverd.login(email.value, encryptData, typeof ip === "string" ? ip : '', key.value.key_id)
+      Servers.login(email.value, encryptData, typeof ip === "string" ? ip : '', key.value.key_id)
         .then((response) => {
           if (response.status === 200) {
             // 登录成功，设置用户信息

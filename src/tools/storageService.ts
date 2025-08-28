@@ -1,13 +1,6 @@
-import {Serverd} from "@/tools/Server.ts";
+import {Servers} from "@/tools/Server.ts";
+import {type Note} from "@/config/config.ts";
 import {useGlobalStore} from "@/config/global.ts";
-
-export interface Note {
-  id: string;
-  title: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 
 function loadNotesFromLocal(): Note[] {
@@ -22,7 +15,7 @@ function saveNotesToLocal(notes: Note[]): void {
 export async function loadNotes(): Promise<Note[]> {
   let global = useGlobalStore();
   if (global.user.token) {
-    return Serverd.get_notes().then(
+    return Servers.get_notes().then(
       (res) => {
         const data = res.data.data;
         console.log(res.data.data)
@@ -47,7 +40,7 @@ export async function saveNotes(notes: Note[]): Promise<void> {
     try {
       // 遍历保存每条笔记
       for (const note of notes) {
-        await Serverd.save_note(note);
+        await Servers.save_note(note);
       }
     } catch (err) {
       console.error(
@@ -66,7 +59,7 @@ export async function deleteNote(notes: Note[], id: string): Promise<Note[]> {
   let global = useGlobalStore();
   if (global.user.token) {
     try {
-      await Serverd.delete_note(id);
+      await Servers.delete_note(id);
     } catch (err) {
       console.error(
         "Failed to delete note from API, falling back to local storage.",

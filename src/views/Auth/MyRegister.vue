@@ -38,8 +38,9 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
-import {Serverd} from "@/tools/Server.ts";
+import {Servers} from "@/tools/Server.ts";
 import {sm2} from 'sm-crypto';
+import {type KEY} from "@/config/config.ts";
 
 const username = ref('')
 const email = ref('')
@@ -49,10 +50,7 @@ const Message = ref('')
 let massage_color = true
 const router = useRouter()
 
-const key = ref<{
-  key_id: string,
-  public_key: string,
-}>({
+const key = ref<KEY>({
   key_id: '',
   public_key: '',
 })
@@ -68,7 +66,7 @@ function handleRegister() {
     massage_color = false
     return
   }
-  Serverd.getKey().then(res => {
+  Servers.getKey().then(res => {
     if (res.status != 200) {
       Message.value = '获取公钥失败：' + res.data.message
       massage_color = false
@@ -78,7 +76,7 @@ function handleRegister() {
     key.value.key_id = res.data.key_id
     key.value.public_key = res.data.public_key
     password.value = sm2.doEncrypt(password.value, key.value.public_key, 0);
-    Serverd.register({
+    Servers.register({
       username: username.value,
       email: email.value,
       password: password.value,

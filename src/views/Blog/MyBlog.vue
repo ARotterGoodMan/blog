@@ -19,16 +19,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import {ref, onMounted} from 'vue'
+import {useRoute} from 'vue-router'
+import {type Post} from "@/config/config.ts";
 
-interface Post {
-  id: number
-  title: string
-  author: string
-  date: string
-  content: string
-}
 
 // 模拟文章数据库（实际可从后端获取）
 const posts: Post[] = [

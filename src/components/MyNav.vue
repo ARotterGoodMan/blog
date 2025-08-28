@@ -62,7 +62,7 @@
 <script lang="ts" setup>
 import router from "@/router";
 import {useGlobalStore} from "@/config/global";
-import {Serverd} from "@/tools/Server.ts";
+import {Servers} from "@/tools/Server.ts";
 import {type RouteRecordName, useRoute} from 'vue-router'
 
 
@@ -84,7 +84,7 @@ const isActive = (path: string) => path === currentRoute.path;
 
 function toggleLogout() {
   sessionStorage.removeItem('user')
-  Serverd.logout()
+  Servers.logout()
   global.setUser({
     username: '',
     email: '',
