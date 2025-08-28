@@ -3,7 +3,7 @@ import {useGlobalStore} from "@/config/global.ts";
 
 class Server {
   constructor() {
-    const url = 'http://api.svipsvip.中国/api';
+    const url = '';
     axios.defaults.baseURL = url;
   }
 
